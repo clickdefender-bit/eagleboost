@@ -58,8 +58,8 @@ export const LiveTraffic: React.FC = () => {
     <div className="space-y-8 text-white bg-slate-900 min-h-screen">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Live Traffic</h1>
-        <p className="text-slate-400">Monitor real-time visitor activity</p>
+        <h1 className="text-3xl font-bold text-white">Tráfego ao Vivo</h1>
+        <p className="text-slate-400">Monitore a atividade dos visitantes em tempo real</p>
       </div>
 
       {/* Live Stats */}
@@ -70,7 +70,7 @@ export const LiveTraffic: React.FC = () => {
               <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-400">Active Now</p>
+              <p className="text-sm font-medium text-slate-400">Ativos Agora</p>
               <p className="text-2xl font-bold text-white">{activeVisitors}</p>
             </div>
           </div>
@@ -82,7 +82,7 @@ export const LiveTraffic: React.FC = () => {
               <Users className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-400">Total Today</p>
+              <p className="text-sm font-medium text-slate-400">Total Hoje</p>
               <p className="text-2xl font-bold text-white">{todayStats.totalVisitors}</p>
             </div>
           </div>
@@ -94,7 +94,7 @@ export const LiveTraffic: React.FC = () => {
               <Eye className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-400">Page Views</p>
+              <p className="text-sm font-medium text-slate-400">Visualizações</p>
               <p className="text-2xl font-bold text-white">{todayStats.totalPageViews}</p>
             </div>
           </div>
@@ -104,7 +104,7 @@ export const LiveTraffic: React.FC = () => {
       {/* Live Visitors Table */}
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-700">
-          <h3 className="text-lg font-semibold text-white">Active Visitors</h3>
+          <h3 className="text-lg font-semibold text-white">Visitantes Ativos</h3>
         </div>
         
         <div className="overflow-x-auto">
@@ -115,19 +115,19 @@ export const LiveTraffic: React.FC = () => {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                  Location
+                  Localização
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                  Device
+                  Dispositivo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                  Current Page
+                  Página Atual
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                  Time on Site
+                  Tempo no Site
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                  Source
+                  Origem
                 </th>
               </tr>
             </thead>
@@ -183,26 +183,36 @@ export const LiveTraffic: React.FC = () => {
 
       {/* Real-time Activity Feed */}
       <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-        <h3 className="text-lg font-semibold text-white mb-4">Real-time Activity</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Atividade em Tempo Real</h3>
         <div className="space-y-3 max-h-64 overflow-y-auto">
-          {[
-            { action: 'New visitor from New York, US', time: 'Just now', type: 'visitor' },
-            { action: 'Visitor clicked "CLAIM OFFER NOW" button', time: '30 seconds ago', type: 'conversion' },
-            { action: 'Visitor watched video for 2:30', time: '1 minute ago', type: 'engagement' },
-            { action: 'New visitor from São Paulo, BR', time: '2 minutes ago', type: 'visitor' },
-            { action: 'Visitor scrolled to testimonials section', time: '3 minutes ago', type: 'engagement' },
-          ].map((activity, index) => (
-            <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-700">
-              <div className={`w-2 h-2 rounded-full mt-2 ${
-                activity.type === 'conversion' ? 'bg-green-500' :
-                activity.type === 'engagement' ? 'bg-blue-500' : 'bg-slate-400'
-              }`}></div>
-              <div className="flex-1">
-                <p className="text-sm text-white">{activity.action}</p>
-                <p className="text-xs text-slate-400">{activity.time}</p>
-              </div>
+          {visitors.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-400">Nenhuma atividade recente</p>
+              <p className="text-xs text-slate-500 mt-1">Os dados aparecerão quando houver visitantes reais</p>
             </div>
-          ))}
+          ) : (
+            visitors.slice(0, 10).map((visitor) => {
+              const timeAgo = Math.floor((Date.now() - visitor.lastActivity) / 1000);
+              const timeText = timeAgo < 60 ? 'Agora mesmo' : 
+                              timeAgo < 3600 ? `${Math.floor(timeAgo / 60)} min atrás` :
+                              `${Math.floor(timeAgo / 3600)}h atrás`;
+              
+              return (
+                <div key={visitor.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-700">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    visitor.isActive ? 'bg-green-500' : 'bg-slate-400'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm text-white">
+                      Visitante de {visitor.city || 'Localização desconhecida'}
+                      {visitor.country ? `, ${visitor.country}` : ''}
+                    </p>
+                    <p className="text-xs text-slate-400">{timeText}</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

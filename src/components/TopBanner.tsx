@@ -23,10 +23,8 @@ export const TopBanner: React.FC<TopBannerProps> = ({ className = '' }) => {
 
   return (
     <div className={`w-full max-w-sm mx-auto text-center ${className}`}>
-      <h1 className="text-4xl font-black mb-6 leading-tight">
-        <span className="text-blue-300">Baking Soda</span>
-        <br />
-        <span className="text-cyan-400">cures Impotence</span>
+      <h1 className="text-4xl font-black mb-6 leading-tight text-blue-300">
+        {topBanner.title}
       </h1>
       
       <p className="text-blue-200 text-lg font-medium mb-4">

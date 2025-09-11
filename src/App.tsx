@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TrackingProvider } from './components/TrackingProvider';
 import { BoltNavigation } from './components/BoltNavigation';
 import { VideoContainer } from './components/VideoContainer';
-import { ContentLocker } from './components/ContentLocker';
+import { ContentBlocker } from './components/ContentBlocker';
 import { DTCOfferBlock } from './components/DTCOfferBlock';
 import { AlternativeOffers } from './components/AlternativeOffers';
 import { DoctorCarousel } from './components/DoctorCarousel';
@@ -13,7 +13,6 @@ import { GuaranteeDropdown } from './components/GuaranteeDropdown';
 import { FAQBlock } from './components/FAQBlock';
 import { Footer } from './components/Footer';
 import { TopBanner } from './components/TopBanner';
-import { useContentSection } from './hooks/useContent';
 
 // Importar todos os blocos separados
 import { HeaderBlock } from './components/blocks/HeaderBlock';
@@ -23,8 +22,10 @@ import { TransformLifeTitleBlock } from './components/blocks/TransformLifeTitleB
 import { TransformationStartsTodayBlock } from './components/blocks/TransformationStartsTodayBlock';
 import { NewsOutletsTitleBlock } from './components/blocks/NewsOutletsTitleBlock';
 import { NoFiltersBlock } from './components/blocks/NoFiltersBlock';
+
 import { SuccessStoryCTABlock } from './components/blocks/SuccessStoryCTABlock';
 import { useTracking } from './components/TrackingProvider';
+import { useContentSection } from './hooks/useContent';
 
 // Admin Components
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -39,7 +40,7 @@ import { Settings } from './components/admin/Settings';
 
 const MainContent: React.FC = () => {
   const { trackClick } = useTracking();
-  const pageTimer = useContentSection('pageTimer');
+  const video = useContentSection('video');
   
   // Force re-render quando conteúdo muda
   const [renderKey, setRenderKey] = React.useState(0);
@@ -61,21 +62,6 @@ const MainContent: React.FC = () => {
     };
   }, []);
 
-  // Dispatch timer info for timer system
-  React.useEffect(() => {
-    if (pageTimer.enabled) {
-      const timerInfo = {
-        enabled: pageTimer.enabled,
-        unlockTimeMinutes: pageTimer.unlockTimeMinutes,
-        unlockTimeSeconds: pageTimer.unlockTimeSeconds,
-        totalUnlockSeconds: (pageTimer.unlockTimeMinutes * 60) + pageTimer.unlockTimeSeconds
-      };
-      
-      // Dispatch custom event with timer info
-      window.dispatchEvent(new CustomEvent('pageTimerConfig', { detail: timerInfo }));
-    }
-  }, [pageTimer.enabled, pageTimer.unlockTimeMinutes, pageTimer.unlockTimeSeconds]);
-
   const handleBackgroundClick = () => {
     trackClick('background', {
       utm_content: 'page_background',
@@ -93,18 +79,26 @@ const MainContent: React.FC = () => {
         <TopBanner className="w-full mb-4" />
         
         {/* Bloco: Container de Vídeo */}
-        <VideoContainer className="w-full max-w-xs sm:max-w-sm md:max-w-md mb-4" />
+        <VideoContainer 
+          embedCode={video.embedCode}
+          aspectRatio={video.aspectRatio}
+          className="w-full max-w-xs sm:max-w-sm md:max-w-md mb-4" 
+        />
         
-        {/* Content with Timer Lock */}
-        <ContentLocker className="w-full">
+        {/* Conteúdo Bloqueado - Aparece apenas após o tempo configurado */}
+        <ContentBlocker>
           {/* Bloco: Oferta Principal DTC */}
-          <DTCOfferBlock className="w-full mb-4" />
+          <div id="oferta-6-bottles">
+            <DTCOfferBlock className="w-full mb-4" />
+          </div>
           
           {/* Bloco: Ofertas Alternativas */}
           <AlternativeOffers className="w-full mb-8" />
           
           {/* Bloco: Header Doctors Section */}
           <HeaderBlock />
+          
+
           
           {/* Bloco: Carrossel de Médicos */}
           <DoctorCarousel className="w-full mb-8" />
@@ -164,13 +158,18 @@ const MainContent: React.FC = () => {
           
           {/* Footer */}
           <Footer className="w-full" />
-        </ContentLocker>
+        </ContentBlocker>
       </div>
     </div>
   );
 };
 
 // App principal
+// Importações para autenticação e rotas protegidas
+import { Login } from './components/admin/Login';
+import { ProtectedRoute } from './components/admin/ProtectedRoute';
+
+// No componente App, atualize as rotas
 function App() {
   const [currentPage, setCurrentPage] = React.useState('main');
 
@@ -185,13 +184,16 @@ function App() {
         
         <Routes>
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="live" element={<LiveTraffic />} />
-            <Route path="content" element={<ContentEditor />} />
-            <Route path="logs" element={<Logs />} />
-            <Route path="integrations" element={<Integrations />} />
-            <Route path="settings" element={<Settings />} />
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin" element={<ProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="live" element={<LiveTraffic />} />
+              <Route path="content" element={<ContentEditor />} />
+              <Route path="logs" element={<Logs />} />
+              <Route path="integrations" element={<Integrations />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
           </Route>
           
           {/* Main Page Route */}

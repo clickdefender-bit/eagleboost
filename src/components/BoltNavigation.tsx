@@ -13,8 +13,7 @@ export const BoltNavigation: React.FC<BoltNavigationProps> = ({ currentPage, onP
 
   // Detecta se está no ambiente Bolt
   const isBoltEnvironment = window.location.hostname.includes('bolt') || 
-                           window.location.hostname.includes('localhost') ||
-                           process.env.NODE_ENV === 'development';
+                           window.location.hostname.includes('localhost');
 
   // Se não estiver no Bolt, não renderiza o menu
   if (!isBoltEnvironment) {
@@ -34,7 +33,7 @@ export const BoltNavigation: React.FC<BoltNavigationProps> = ({ currentPage, onP
   return (
     <>
       {/* Floating Menu Button */}
-      <div className="fixed top-4 right-4 z-[9999]">
+      <div className="fixed top-4 right-4 z-[9999] hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"

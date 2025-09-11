@@ -10,19 +10,32 @@ export interface SiteContent {
   // Video Container
   video: {
     embedCode: string;
-    duration: string;
+    aspectRatio: '16:9' | '9:16';
     soundWarning: string;
     urgencyWarning: string;
   };
   
-  // Page Timer
-  pageTimer: {
+  // Content Blocker
+  contentBlocker: {
     enabled: boolean;
+    // Modo de agendamento
+    scheduleMode: 'immediate' | 'specific_time' | 'after_video';
+    // Para modo imediato (baseado em duração)
     unlockTimeMinutes: number;
     unlockTimeSeconds: number;
-    lockedMessage: string;
-    lockedTitle: string;
-    lockedSubtitle: string;
+    // Para modo de horário específico
+    scheduledStartTime?: string; // ISO string
+    scheduledEndTime?: string; // ISO string
+    // Configurações de duração flexível
+    durationType: 'minutes' | 'hours' | 'days';
+    durationValue: number;
+    // Fuso horário
+    timezone: string;
+    // Configurações de exibição (não usadas no modo silencioso)
+    blockedTitle: string;
+    blockedSubtitle: string;
+    blockedMessage: string;
+    timerDisplay: boolean;
   };
   
   // Main Offer
@@ -170,19 +183,26 @@ const defaultContent: SiteContent = {
   },
   
   video: {
-    embedCode: "",
-    duration: "9:16",
+    embedCode: "<vturb-smartplayer id='vid-68c1baf2d111494b6113b2dc' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>",
+    aspectRatio: "9:16",
     soundWarning: "Please make sure your sound is on",
     urgencyWarning: "This video may be taken down at any time",
   },
-  
-  pageTimer: {
-    enabled: false,
-    unlockTimeMinutes: 0,
+
+  contentBlocker: {
+    enabled: true,
+    scheduleMode: 'immediate',
+    unlockTimeMinutes: 1,
     unlockTimeSeconds: 0,
-    lockedMessage: "Complete content will be available after watching the video for {{time}}",
-    lockedTitle: "🔒 Content Locked",
-    lockedSubtitle: "Keep watching the video above to unlock all content"
+    scheduledStartTime: undefined,
+    scheduledEndTime: undefined,
+    durationType: 'minutes',
+    durationValue: 1,
+    timezone: 'America/New_York',
+    blockedTitle: "",
+    blockedSubtitle: "",
+    blockedMessage: "",
+    timerDisplay: false
   },
   
   mainOffer: {
@@ -234,7 +254,7 @@ const defaultContent: SiteContent = {
         institution: "Columbia University",
         photo: "https://imgur.com/Jsdpslh.png",
         recommendation: "EAGLEBOOST represents a breakthrough in natural men's health. Simple ingredients, impressive results.",
-        videoEmbed: ""
+        videoEmbed: "<vturb-smartplayer id='vid-doctor-1' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       },
       {
         id: 2,
@@ -243,7 +263,7 @@ const defaultContent: SiteContent = {
         institution: "University of Maryland",
         photo: "https://imgur.com/PgyFyIB.png",
         recommendation: "EAGLEBOOST offers men a proven alternative that supports both physical and mental wellness.",
-        videoEmbed: ""
+        videoEmbed: "<vturb-smartplayer id='vid-doctor-2' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       },
       {
         id: 3,
@@ -252,7 +272,7 @@ const defaultContent: SiteContent = {
         institution: "Integrative Medicine",
         photo: "https://imgur.com/jsyoqH5.png",
         recommendation: "The ingredients I chose in EAGLEBOOST restore vitality exactly my philosophy.",
-        videoEmbed: ""
+        videoEmbed: "<vturb-smartplayer id='vid-doctor-3' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       }
     ]
   },
@@ -268,7 +288,7 @@ const defaultContent: SiteContent = {
         photo: "https://imgur.com/uEGrHTs.png",
         testimonial: "My wife noticed the difference before I even told her about EagleBoost!",
         rating: 5,
-        videoEmbed: ""
+        videoEmbed: "<vturb-smartplayer id='vid-testimonial-1' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       },
       {
         id: 2,
@@ -277,7 +297,7 @@ const defaultContent: SiteContent = {
         photo: "https://imgur.com/fyYHrSK.png",
         testimonial: "After 50, I thought there was no hope. EagleBoost proved me wrong!",
         rating: 5,
-        videoEmbed: ""
+        videoEmbed: "<vturb-smartplayer id='vid-testimonial-2' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       },
       {
         id: 3,
@@ -286,7 +306,7 @@ const defaultContent: SiteContent = {
         photo: "https://imgur.com/m9I7AHX.png",
         testimonial: "EagleBoost completely changed my life. I felt the difference in just 2 weeks!",
         rating: 5,
-        videoEmbed: ""
+        videoEmbed: "<vturb-smartplayer id='vid-testimonial-3' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       }
     ]
   },
@@ -417,7 +437,7 @@ class ContentManager {
   }
 
   // Merge conteúdo salvo com padrão para garantir compatibilidade
-  private mergeWithDefault(stored: any): SiteContent {
+  private mergeWithDefault(stored: Partial<SiteContent>): SiteContent {
     return {
       ...defaultContent,
       ...stored,
@@ -461,9 +481,27 @@ class ContentManager {
         }
       });
       
+      // Dispatch custom event for components that might not be using the hook
+      const event = new CustomEvent('contentUpdated', { 
+        detail: { ...this.content } 
+      });
+      window.dispatchEvent(event);
+      console.log('📡 ContentManager: Custom event dispatched');
+      
     } catch (error) {
       console.error('Failed to save content:', error);
     }
+  }
+
+  private notifyListeners(event: string, data?: unknown) {
+    console.log(`🔔 Notifying ${this.listeners.length} listeners for event: ${event}`);
+    this.listeners.forEach(listener => {
+      try {
+        listener({ ...this.content });
+      } catch (error) {
+        console.error('Error notifying listener:', error);
+      }
+    });
   }
 
   // Subscribe to content changes
@@ -514,7 +552,7 @@ class ContentManager {
   // Importa conteúdo de JSON
   importContent(jsonContent: string): boolean {
     try {
-      const imported = JSON.parse(jsonContent);
+      const imported = JSON.parse(jsonContent) as Partial<SiteContent>;
       this.content = this.mergeWithDefault(imported);
       this.saveContent();
       return true;
@@ -527,8 +565,3 @@ class ContentManager {
 
 // Instância global do gerenciador de conteúdo
 export const contentManager = new ContentManager();
-
-// Hook React para usar o gerenciador de conteúdo
-export const useContentManager = () => {
-  return contentManager;
-};

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useTracking } from './TrackingProvider';
 import { useContentSection } from '../hooks/useContent';
+import { VTURBVideoEmbed } from './VTURBVideoEmbed';
 
 interface NewsCarouselProps {
   className?: string;
@@ -117,12 +118,14 @@ export const NewsCarousel: React.FC<NewsCarouselProps> = ({ className = '' }) =>
                   {article.description}
                 </p>
                 
-                {/* Video Embed if available */}
+                {/* VTURB Video if available */}
                 {article.videoEmbed && (
-                  <div className="mb-3">
-                    <div 
-                      className="rounded-lg h-24 overflow-hidden"
-                      dangerouslySetInnerHTML={{ __html: article.videoEmbed }}
+                  <div className="mb-3 h-24">
+                    <VTURBVideoEmbed 
+                      embedCode={article.videoEmbed}
+                      aspectRatio="16:9"
+                      title={`Vídeo: ${article.title}`}
+                      className="h-full"
                     />
                   </div>
                 )}

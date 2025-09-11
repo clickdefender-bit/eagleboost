@@ -9,20 +9,23 @@ import {
   TrendingUp,
   Activity,
   Zap,
-  Edit3
+  Edit3,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../../utils/authService';
 
 export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: BarChart3 },
-    { name: 'Live Traffic', href: '/admin/live', icon: Activity },
-    { name: 'Content Editor', href: '/admin/content', icon: Edit3 },
-    { name: 'Logs', href: '/admin/logs', icon: TrendingUp },
-    { name: 'Integrations', href: '/admin/integrations', icon: Zap },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Painel', href: '/admin', icon: BarChart3 },
+    { name: 'Tráfego ao Vivo', href: '/admin/live', icon: Activity },
+    { name: 'Editor de Conteúdo', href: '/admin/content', icon: Edit3 },
+    { name: 'Registros', href: '/admin/logs', icon: TrendingUp },
+    { name: 'Integrações', href: '/admin/integrations', icon: Zap },
+    { name: 'Configurações', href: '/admin/settings', icon: Settings },
   ];
 
   const handleNavigation = (href: string) => {
@@ -30,6 +33,11 @@ export const AdminLayout: React.FC = () => {
   };
 
   const isActive = (href: string) => location.pathname === href;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
+  };
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -60,6 +68,17 @@ export const AdminLayout: React.FC = () => {
             })}
           </ul>
         </nav>
+
+        {/* Logout button */}
+        <div className="absolute bottom-0 left-0 w-full p-4 border-t border-slate-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            Sair
+          </button>
+        </div>
       </div>
 
       {/* Main content */}

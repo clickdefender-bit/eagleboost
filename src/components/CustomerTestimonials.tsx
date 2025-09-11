@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Star, CheckCircle } from 'lucide-react';
 import { useTracking } from './TrackingProvider';
 import { useContentSection } from '../hooks/useContent';
+import { VTURBVideoEmbed } from './VTURBVideoEmbed';
 
 interface CustomerTestimonialsProps {
   className?: string;
@@ -97,16 +98,16 @@ export const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({ clas
   };
 
   return (
-    <div className={`w-full max-w-sm mx-auto ${className}`}>
+    <div className={`w-full max-w-md mx-auto ${className}`}>
       {/* Carousel Container */}
-      <div className="relative h-96 mb-6 overflow-visible px-8">
+      <div className="relative h-[450px] mb-6 overflow-visible px-8">
         {customers.map((customer, index) => (
           <div
             key={customer.id}
             className="absolute inset-0 transition-all duration-700 ease-in-out"
             style={getCardStyle(index)}
           >
-            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col mx-2">
+            <div className="bg-white rounded-2xl shadow-xl p-5 h-full flex flex-col mx-2">
               {/* Customer Header */}
               <div className="flex items-center gap-3 mb-3">
                 <div className="relative">
@@ -147,26 +148,14 @@ export const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({ clas
                 <span className="text-blue-800 font-bold text-sm ml-2">{customer.rating.toFixed(1)}</span>
               </div>
 
-              {/* Customer Photo/Video Placeholder */}
-              <div className="relative">
-                {customer.videoEmbed ? (
-                  <div 
-                    className="rounded-lg h-32 overflow-hidden cursor-pointer"
-                    onClick={() => handleTestimonialClick(customer.id)}
-                    dangerouslySetInnerHTML={{ __html: customer.videoEmbed }}
-                  />
-                ) : (
-                  <div 
-                    className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg h-32 flex items-center justify-center cursor-pointer group transition-all duration-300 hover:shadow-lg"
-                    onClick={() => handleTestimonialClick(customer.id)}
-                  >
-                    <div className="flex flex-col items-center justify-center text-blue-600">
-                      <div className="text-3xl mb-2">🎥</div>
-                      <div className="text-xs font-bold">Video Testimonial</div>
-                      <div className="text-xs opacity-70">{customer.name}</div>
-                    </div>
-                  </div>
-                )}
+              {/* VTURB Video Testimonial */}
+              <div className="w-full flex-1 min-h-[140px]">
+                <VTURBVideoEmbed 
+                  embedCode={customer.videoEmbed}
+                  aspectRatio="16:9"
+                  title={`Depoimento de ${customer.name}`}
+                  className="w-full h-full rounded-lg overflow-hidden"
+                />
               </div>
             </div>
           </div>

@@ -9,14 +9,14 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react';
-import { realTimeTracker, VisitorData, PageView, ClickEvent } from '../../utils/realTimeTracker';
+import { VisitorData, PageView, ClickEvent } from '../../utils/realTimeTracker';
 
 interface LogEntry {
   id: string;
   type: 'page_view' | 'click' | 'visitor';
   timestamp: number;
   visitorId: string;
-  data: any;
+  data: VisitorData | PageView | ClickEvent;
 }
 
 export const Logs: React.FC = () => {
@@ -33,7 +33,8 @@ export const Logs: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    filterLogs();
+    const filtered = filterLogs(logs, filterType, searchTerm);
+    setFilteredLogs(filtered);
   }, [logs, filterType, searchTerm]);
 
   const loadLogs = () => {
@@ -43,7 +44,7 @@ export const Logs: React.FC = () => {
     const allLogs: LogEntry[] = [];
     
     // Add visitor logs
-    trackingData.visitors.forEach(([id, visitor]: [string, VisitorData]) => {
+    trackingData.visitors.forEach(([, visitor]: [string, VisitorData]) => {
       allLogs.push({
         id: `visitor_${visitor.id}`,
         type: 'visitor',
@@ -79,15 +80,17 @@ export const Logs: React.FC = () => {
     allLogs.sort((a, b) => b.timestamp - a.timestamp);
     
     setLogs(allLogs);
-    setVisitors(Array.from(new Map(trackingData.visitors).values()));
+    if (trackingData?.visitors) {
+      setVisitors(Array.from(new Map(trackingData.visitors).values()) as VisitorData[]);
+    }
   };
 
-  const filterLogs = () => {
+  const filterLogs = (logs: LogEntry[], filter: string, searchTerm: string) => {
     let filtered = logs;
 
     // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(log => log.type === filterType);
+    if (filter !== 'all') {
+      filtered = filtered.filter(log => log.type === filter);
     }
 
     // Filter by search term
@@ -101,7 +104,7 @@ export const Logs: React.FC = () => {
       });
     }
 
-    setFilteredLogs(filtered);
+    return filtered;
   };
 
   const formatTimestamp = (timestamp: number) => {
@@ -126,6 +129,11 @@ export const Logs: React.FC = () => {
     }
   };
 
+  const clearLogs = () => {
+    setLogs([]);
+    setFilteredLogs([]);
+  };
+
   const exportLogs = () => {
     const dataStr = JSON.stringify(filteredLogs, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -141,8 +149,8 @@ export const Logs: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white">Traffic Logs</h1>
-          <p className="text-slate-400">Monitor real-time user activity and parameters</p>
+          <h1 className="text-3xl font-bold text-white">Registros de Tráfego</h1>
+          <p className="text-slate-400">Monitore a atividade do usuário e parâmetros em tempo real</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -151,14 +159,14 @@ export const Logs: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            Atualizar
           </button>
           <button
             onClick={exportLogs}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             <Download className="w-4 h-4" />
-            Export
+            Exportar
           </button>
         </div>
       </div>
@@ -171,7 +179,7 @@ export const Logs: React.FC = () => {
               <Globe className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-400">Total Visitors</p>
+              <p className="text-sm font-medium text-slate-400">Total de Visitantes</p>
               <p className="text-2xl font-bold text-white">{visitors.length}</p>
             </div>
           </div>
@@ -183,7 +191,7 @@ export const Logs: React.FC = () => {
               <Eye className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-400">Page Views</p>
+              <p className="text-sm font-medium text-slate-400">Visualizações</p>
               <p className="text-2xl font-bold text-white">
                 {logs.filter(l => l.type === 'page_view').length}
               </p>
@@ -197,7 +205,7 @@ export const Logs: React.FC = () => {
               <MousePointer className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-400">Click Events</p>
+              <p className="text-sm font-medium text-slate-400">Eventos de Clique</p>
               <p className="text-2xl font-bold text-white">
                 {logs.filter(l => l.type === 'click').length}
               </p>
@@ -228,7 +236,7 @@ export const Logs: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search logs..."
+                placeholder="Buscar registros..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
@@ -245,7 +253,7 @@ export const Logs: React.FC = () => {
             >
               <option value="all">All Events</option>
               <option value="visitor">New Visitors</option>
-              <option value="page_view">Page Views</option>
+              <option value="page_view">Visualizações</option>
               <option value="click">Click Events</option>
             </select>
           </div>
@@ -256,7 +264,7 @@ export const Logs: React.FC = () => {
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-700">
           <h3 className="text-lg font-semibold text-white">
-            Activity Logs ({filteredLogs.length})
+            Registros de Atividade ({filteredLogs.length})
           </h3>
         </div>
         

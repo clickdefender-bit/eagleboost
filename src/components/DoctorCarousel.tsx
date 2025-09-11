@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Play, CheckCircle } from 'lucide-react';
 import { useTracking } from './TrackingProvider';
 import { useContentSection } from '../hooks/useContent';
+import { VTURBVideoEmbed } from './VTURBVideoEmbed';
 
 interface DoctorCarouselProps {
   className?: string;
@@ -133,29 +134,14 @@ export const DoctorCarousel: React.FC<DoctorCarouselProps> = ({ className = '' }
                 </blockquote>
               </div>
 
-              {/* Video Placeholder */}
-              <div className="relative">
-                {doctor.videoEmbed ? (
-                  <div 
-                    className="rounded-lg h-40 overflow-hidden cursor-pointer"
-                    onClick={() => handleVideoClick(doctor.id)}
-                    dangerouslySetInnerHTML={{ __html: doctor.videoEmbed }}
-                  />
-                ) : (
-                  <div 
-                    className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg h-40 flex items-center justify-center cursor-pointer group transition-all duration-300 hover:shadow-lg"
-                    onClick={() => handleVideoClick(doctor.id)}
-                  >
-                    <div className="bg-blue-600 rounded-full p-3 group-hover:bg-blue-700 transition-colors duration-300">
-                      <Play className="w-8 h-8 text-white ml-0.5" fill="currentColor" />
-                    </div>
-                  </div>
-                )}
-                {!doctor.videoEmbed && (
-                  <div className="absolute top-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                    1:00
-                  </div>
-                )}
+              {/* VTURB Video */}
+              <div className="w-full min-h-[120px]">
+                <VTURBVideoEmbed 
+                  embedCode={doctor.videoEmbed}
+                  aspectRatio="16:9"
+                  title={`Vídeo do Dr. ${doctor.name}`}
+                  className="w-full h-full rounded-lg overflow-hidden"
+                />
               </div>
             </div>
           </div>

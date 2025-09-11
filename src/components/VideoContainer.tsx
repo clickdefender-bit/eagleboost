@@ -2,12 +2,25 @@ import React from 'react';
 import { Volume2, AlertTriangle, Clock, Lock } from 'lucide-react';
 import { useTracking } from './TrackingProvider';
 import { useContentSection } from '../hooks/useContent';
+import { VTURBPlayer } from './VTURBPlayer';
 
 interface VideoContainerProps {
+  embedCode: string;
+  aspectRatio: '16:9' | '9:16';
+  thumbnailUrl?: string;
+  title?: string;
   className?: string;
+  autoPlay?: boolean;
 }
 
-export const VideoContainer: React.FC<VideoContainerProps> = ({ className = '' }) => {
+export const VideoContainer: React.FC<VideoContainerProps> = ({
+  embedCode,
+  aspectRatio,
+  thumbnailUrl,
+  title = 'Vídeo',
+  className = '',
+  autoPlay = false
+}) => {
   const { trackClick, trackVideoInteraction } = useTracking();
   const video = useContentSection('video');
 
@@ -24,31 +37,34 @@ export const VideoContainer: React.FC<VideoContainerProps> = ({ className = '' }
 
   return (
     <div className={`relative ${className}`}>
-      {/* Container principal do vídeo - proporção 9:16 */}
+      {/* Container principal do vídeo - proporção responsiva */}
       <div 
-        className="relative w-full max-w-sm mx-auto rounded-2xl shadow-2xl overflow-hidden transition-all duration-500 hover:shadow-blue-500/20 hover:scale-105"
-        style={{ aspectRatio: '9/16' }}
+        className={`relative w-full rounded-2xl shadow-2xl overflow-hidden transition-all duration-500 hover:shadow-blue-500/20 hover:scale-105 ${
+          aspectRatio === '9:16' ? 'max-w-sm mx-auto' : 'max-w-4xl mx-auto'
+        }`}
+        style={{ aspectRatio: aspectRatio === '9:16' ? '9/16' : '16/9' }}
         onClick={handleVideoClick}
       >
-        {/* VTURB Embed ou Placeholder */}
-        {video.embedCode ? (
-          <div 
+        {/* VTURB Player */}
+        <VTURBPlayer 
+            embedCode={embedCode}
+            aspectRatio={aspectRatio}
             className="w-full h-full"
-            dangerouslySetInnerHTML={{ __html: video.embedCode }}
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-            <div className="text-center text-white p-6">
-              <div className="text-6xl mb-4">🎥</div>
-              <h3 className="text-xl font-bold mb-2">Vídeo VTURB</h3>
-              <p className="text-sm opacity-80">Configure o embed no admin</p>
-            </div>
-          </div>
-        )}
+            onLoad={() => {
+              trackVideoInteraction('click', {
+              utm_content: 'vturb_player_loaded'
+            });
+          }}
+          onError={(error) => {
+            console.error('Erro no player VTURB:', error);
+          }}
+        />
       </div>
       
       {/* Blocos informativos */}
-      <div className="mt-4 space-y-3 max-w-sm mx-auto">
+      <div className={`mt-4 space-y-3 ${
+        aspectRatio === '9:16' ? 'max-w-sm mx-auto' : 'max-w-4xl mx-auto'
+      }`}>
         {/* Bloco de som */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
           <Volume2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />

@@ -130,7 +130,7 @@ export const ContentEditor: React.FC = () => {
     }
   };
 
-  const handleReset = () => {
+  const handleResetar = () => {
     if (confirm('Tem certeza que deseja resetar todo o conteúdo para o padrão?')) {
       contentManager.resetToDefault();
       setContent(contentManager.getContent());
@@ -141,7 +141,7 @@ export const ContentEditor: React.FC = () => {
   const sections = [
     { id: 'topBanner', name: 'Top Banner', icon: '🎯' },
     { id: 'video', name: 'Vídeo', icon: '🎥' },
-    { id: 'pageTimer', name: 'Timer da Página', icon: '⏰' },
+    { id: 'contentBlocker', name: 'Bloqueio de Conteúdo', icon: '🔒' },
     { id: 'mainOffer', name: 'Oferta Principal', icon: '💊' },
     { id: 'alternativeOffers', name: 'Ofertas Alternativas', icon: '📦' },
     { id: 'doctors', name: 'Médicos', icon: '👨‍⚕️' },
@@ -262,7 +262,12 @@ export const ContentEditor: React.FC = () => {
                 value={content.video.embedCode || ''}
                 onChange={(e) => handleInputChange('video.embedCode', e.target.value)}
                 placeholder='Cole aqui o código embed da VTURB, exemplo:
-<iframe src="https://vturb.com/embed/..." width="100%" height="100%" frameborder="0" allowfullscreen></iframe>'
+<vturb-smartplayer id="vid-68c1baf2d111494b6113b2dc" style="display: block; margin: 0 auto; width: 100%;"></vturb-smartplayer>
+<script type="text/javascript">
+var s=document.createElement("script");
+s.src="https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js";
+s.async=!0,document.head.appendChild(s);
+</script>'
                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400 resize-vertical min-h-[120px] font-mono text-sm"
                 rows={6}
               />
@@ -271,82 +276,100 @@ export const ContentEditor: React.FC = () => {
               </p>
             </div>
             
-            {renderInput('Duração', 'video.duration')}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Proporção do Vídeo
+              </label>
+              <select
+                value={content.video.aspectRatio}
+                onChange={(e) => handleInputChange('video.aspectRatio', e.target.value as '16:9' | '9:16')}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              >
+                <option value="9:16">9:16 (Vertical - Mobile)</option>
+                <option value="16:9">16:9 (Horizontal - Desktop)</option>
+              </select>
+              <p className="text-slate-400 text-xs mt-2">
+                💡 Escolha a proporção que melhor se adapta ao seu vídeo. 9:16 é ideal para vídeos verticais (mobile), 16:9 para vídeos horizontais (desktop).
+              </p>
+            </div>
+            
             {renderInput('Aviso de Som', 'video.soundWarning')}
             {renderInput('Aviso de Urgência', 'video.urgencyWarning', 'textarea')}
           </div>
         );
 
-      case 'pageTimer':
+      case 'contentBlocker':
         return (
           <div>
-            <h3 className="text-xl font-bold text-white mb-6">Timer da Página</h3>
+            <h3 className="text-xl font-bold text-white mb-6">Bloqueio de Conteúdo</h3>
+            <p className="text-slate-400 mb-6">
+              Configure o sistema de bloqueio que esconde o conteúdo por um tempo determinado após o vídeo.
+            </p>
             
-            {/* Ativar/Desativar Timer */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                <div>
-                  <h4 className="text-white font-semibold">Ativar Timer da Página</h4>
-                  <p className="text-slate-400 text-sm">Bloqueia o conteúdo até o tempo definido</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={content.pageTimer.enabled || false}
-                    onChange={(e) => handleInputChange('pageTimer.enabled', e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
+            <div className="mb-4">
+              <label className="flex items-center gap-3 text-white">
+                <input
+                  type="checkbox"
+                  checked={content.contentBlocker.enabled}
+                  onChange={(e) => handleInputChange('contentBlocker.enabled', e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium">Ativar bloqueio de conteúdo</span>
+              </label>
             </div>
-
-            {/* Configurações do Timer - só aparece se ativado */}
-            {content.pageTimer.enabled && (
+            
+            {content.contentBlocker.enabled && (
               <>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Minutos
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="60"
-                      value={content.pageTimer.unlockTimeMinutes || 0}
-                      onChange={(e) => handleInputChange('pageTimer.unlockTimeMinutes', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                      placeholder="0"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Segundos
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={content.pageTimer.unlockTimeSeconds || 0}
-                      onChange={(e) => handleInputChange('pageTimer.unlockTimeSeconds', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                      placeholder="0"
-                    />
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Timer
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Minutos</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        step="1"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                        placeholder="0"
+                        value={Math.floor(content.contentBlocker.unlockTimeMinutes)}
+                        onChange={(e) => {
+                          const minutes = parseInt(e.target.value) || 0;
+                          const seconds = Math.floor((content.contentBlocker.unlockTimeMinutes % 1) * 60);
+                          handleInputChange('contentBlocker.unlockTimeMinutes', minutes + (seconds / 60));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Segundos</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        step="1"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                        placeholder="0"
+                        value={Math.floor((content.contentBlocker.unlockTimeMinutes % 1) * 60)}
+                        onChange={(e) => {
+                          const seconds = parseInt(e.target.value) || 0;
+                          const minutes = Math.floor(content.contentBlocker.unlockTimeMinutes);
+                          handleInputChange('contentBlocker.unlockTimeMinutes', minutes + (seconds / 60));
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {renderInput('Título do Bloqueio', 'pageTimer.lockedTitle')}
-                {renderInput('Subtítulo', 'pageTimer.lockedSubtitle')}
-                {renderInput('Mensagem de Bloqueio', 'pageTimer.lockedMessage', 'textarea')}
                 
-                {/* Preview */}
                 <div className="bg-slate-700 rounded-lg p-4 mt-4">
-                  <h6 className="text-sm font-semibold text-white mb-2">⏰ Preview:</h6>
-                  <div className="text-xs text-slate-300 space-y-1">
-                    <p><strong>Tempo:</strong> {content.pageTimer.unlockTimeMinutes || 0}:{(content.pageTimer.unlockTimeSeconds || 0).toString().padStart(2, '0')}</p>
-                    <p><strong>Total:</strong> {((content.pageTimer.unlockTimeMinutes || 0) * 60) + (content.pageTimer.unlockTimeSeconds || 0)} segundos</p>
-                  </div>
+                  <h4 className="text-white font-medium mb-2">ℹ️ Como funciona:</h4>
+                  <ul className="text-slate-300 text-sm space-y-1">
+                    <li>• Defina quantos minutos o conteúdo ficará oculto</li>
+                    <li>• Após o tempo, o conteúdo aparece automaticamente</li>
+                    <li>• Usuário vê apenas o vídeo, sem saber do bloqueio</li>
+                    <li>• Sistema completamente invisível</li>
+                  </ul>
                 </div>
               </>
             )}
@@ -737,7 +760,7 @@ export const ContentEditor: React.FC = () => {
             
             {/* Preview Section */}
             <div className="bg-slate-700 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-white mb-4">Preview dos Botões</h4>
+              <h4 className="text-lg font-semibold text-white mb-4">Visualização dos Botões</h4>
               <div className="space-y-4">
                 {content.customCTAs.doctorTrustCTA.enabled && (
                   <div className="max-w-sm mx-auto">
@@ -870,11 +893,11 @@ export const ContentEditor: React.FC = () => {
           </label>
           
           <button
-            onClick={handleReset}
+            onClick={handleResetar}
             className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
           >
             <RotateCcw className="w-4 h-4" />
-            Reset
+            Resetar
           </button>
         </div>
       </div>

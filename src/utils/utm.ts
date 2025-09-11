@@ -18,12 +18,7 @@ export interface TrackingEvent {
 }
 
 class UTMTracker {
-  private defaultUTMParams: UTMParams = {
-    utm_source: 'direct',
-    utm_medium: 'website',
-    utm_campaign: 'main_page',
-    utm_content: 'video_container'
-  };
+  // Sem parâmetros UTM padrão - apenas dados reais serão capturados
 
   // Captura parâmetros UTM da URL atual
   getCurrentUTMParams(): UTMParams {
@@ -46,7 +41,7 @@ class UTMTracker {
       }
     });
 
-    return { ...this.defaultUTMParams, ...utmParams };
+    return utmParams;
   }
 
   // Constrói URL com parâmetros UTM
@@ -84,7 +79,7 @@ class UTMTracker {
   }
 
   // Simula envio para plataformas de analytics
-  private sendToAnalytics(data: any): void {
+  private sendToAnalytics(data: Record<string, unknown>): void {
     // Google Analytics 4 (gtag)
     if (typeof gtag !== 'undefined') {
       gtag('event', data.event_action, {
@@ -105,7 +100,7 @@ class UTMTracker {
   }
 
   // Envio para servidor de analytics próprio
-  private async sendToServer(data: any): Promise<void> {
+  private async sendToServer(data: Record<string, unknown>): Promise<void> {
     try {
       await fetch('/api/analytics', {
         method: 'POST',
@@ -163,6 +158,6 @@ export const useUTMTracker = () => {
 
 // Tipos para TypeScript
 declare global {
-  function gtag(...args: any[]): void;
-  function fbq(...args: any[]): void;
+  function gtag(...args: unknown[]): void;
+  function fbq(...args: unknown[]): void;
 }

@@ -46,12 +46,12 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
               <img 
                 src={alternativeOffers.offer1.productImage}
                 alt={`EAGLEBOOST ${alternativeOffers.offer1.packageName}`}
-                className="w-full h-32 object-contain"
+                className="w-full h-45 object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.parentElement!.innerHTML = `
-                    <div class="w-full h-32 bg-blue-800 rounded-lg flex items-center justify-center">
+                    <div class="w-full h-45 bg-blue-800 rounded-lg flex items-center justify-center">
                       <div class="text-center text-white">
                         <div class="text-xl mb-1">💊💊💊</div>
                         <div class="font-bold text-xs">${alternativeOffers.offer1.packageName}</div>
@@ -117,12 +117,12 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
               <img 
                 src={alternativeOffers.offer2.productImage}
                 alt={`EAGLEBOOST ${alternativeOffers.offer2.packageName}`}
-                className="w-full h-32 object-contain"
+                className="w-full h-45 object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.parentElement!.innerHTML = `
-                    <div class="w-full h-32 bg-blue-800 rounded-lg flex items-center justify-center">
+                    <div class="w-full h-45 bg-blue-800 rounded-lg flex items-center justify-center">
                       <div class="text-center text-white">
                         <div class="text-xl mb-1">💊💊</div>
                         <div class="font-bold text-xs">${alternativeOffers.offer2.packageName}</div>

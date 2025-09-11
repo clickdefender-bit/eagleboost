@@ -34,7 +34,7 @@ interface ClickEvent {
   element: string;
   page: string;
   timestamp: number;
-  utmParams: any;
+  utmParams: Record<string, unknown>;
 }
 
 class RealTimeTracker {
@@ -77,7 +77,7 @@ class RealTimeTracker {
     }
   }
 
-  private getUTMParams(): any {
+  private getUTMParams(): Record<string, string | null> {
     const urlParams = new URLSearchParams(window.location.search);
     return {
       utm_source: urlParams.get('utm_source'),
@@ -195,7 +195,7 @@ class RealTimeTracker {
       element: element,
       page: window.location.pathname,
       timestamp: Date.now(),
-      utmParams: this.getUTMParams()
+      utmParams: this.getUTMParams() as Record<string, unknown>
     };
 
     this.clickEvents.push(clickEvent);

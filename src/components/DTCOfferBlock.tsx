@@ -50,13 +50,13 @@ export const DTCOfferBlock: React.FC<DTCOfferBlockProps> = ({ className = '' }) 
             <img 
               src={mainOffer.productImage}
               alt={`${mainOffer.productName} ${mainOffer.packageName}`}
-              className="w-full h-48 object-contain"
+              className="w-full h-67 object-contain"
               onError={(e) => {
                 // Fallback se a imagem não carregar
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
                 target.parentElement!.innerHTML = `
-                  <div class="w-full h-48 bg-blue-800 rounded-lg flex items-center justify-center">
+                  <div class="w-full h-67 bg-blue-800 rounded-lg flex items-center justify-center">
                     <div class="text-center text-white">
                       <div class="text-3xl mb-2">💊</div>
                       <div class="font-black text-xl tracking-wide">${mainOffer.productName}</div>

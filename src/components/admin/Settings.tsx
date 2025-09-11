@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, Key, Globe, Bell, Shield, Database } from 'lucide-react';
+import { Save, Key, Globe, Bell, Shield } from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const [settings, setSettings] = useState({
@@ -22,21 +22,21 @@ export const Settings: React.FC = () => {
     <div className="space-y-8 text-white bg-slate-900 min-h-screen">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Settings</h1>
-        <p className="text-slate-400">Configure your admin panel and tracking settings</p>
+        <h1 className="text-3xl font-bold text-white">Configurações</h1>
+        <p className="text-slate-400">Configure seu painel administrativo e configurações de rastreamento</p>
       </div>
 
       {/* General Settings */}
       <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
         <div className="flex items-center gap-3 mb-6">
           <Globe className="w-6 h-6 text-blue-600" />
-          <h3 className="text-lg font-semibold text-white">General Settings</h3>
+          <h3 className="text-lg font-semibold text-white">Configurações Gerais</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Site Name
+              Nome do Site
             </label>
             <input
               type="text"
@@ -48,7 +48,7 @@ export const Settings: React.FC = () => {
           
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Site URL
+              URL do Site
             </label>
             <input
               type="url"
@@ -60,7 +60,7 @@ export const Settings: React.FC = () => {
           
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Timezone
+              Fuso Horário
             </label>
             <select
               value={settings.timezone}
@@ -81,13 +81,13 @@ export const Settings: React.FC = () => {
       <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
         <div className="flex items-center gap-3 mb-6">
           <Key className="w-6 h-6 text-green-600" />
-          <h3 className="text-lg font-semibold text-white">API Settings</h3>
+          <h3 className="text-lg font-semibold text-white">Configurações de API</h3>
         </div>
         
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              API Key
+              Chave da API
             </label>
             <div className="flex gap-2">
               <input
@@ -97,11 +97,11 @@ export const Settings: React.FC = () => {
                 className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-400"
               />
               <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                Regenerate
+                Regenerar
               </button>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Use this key to access the EAGLEBOOST Analytics API
+              Use esta chave para acessar a API do EAGLEBOOST Analytics
             </p>
           </div>
         </div>
@@ -111,13 +111,13 @@ export const Settings: React.FC = () => {
       <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-6 h-6 text-purple-600" />
-          <h3 className="text-lg font-semibold text-white">Tracking Settings</h3>
+          <h3 className="text-lg font-semibold text-white">Configurações de Rastreamento</h3>
         </div>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-sm font-medium text-white">Enable Tracking</h4>
+              <h4 className="text-sm font-medium text-white">Habilitar Rastreamento</h4>
               <p className="text-sm text-slate-400">Collect visitor analytics and behavior data</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -198,7 +198,7 @@ export const Settings: React.FC = () => {
           className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Save className="w-5 h-5" />
-          Save Settings
+          Salvar Configurações
         </button>
       </div>
     </div>

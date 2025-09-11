@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teste do Bloqueio Silencioso</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font-family: system-ui, -apple-system, Arial, sans-serif; }
+    .container { max-width: 960px; margin: 0 auto; padding: 16px; }
+    
+    /* Bloco do vídeo (sempre visível) */
+    .vsl { 
+      aspect-ratio: 16 / 9; 
+      background: #111; 
+      color: #fff; 
+      display: grid; 
+      place-items: center; 
+      border-radius: 12px; 
+      margin-bottom: 2rem;
+    }
+    
+    /* Tudo abaixo do vídeo começa oculto */
+    .below-fold.locked { display: none !important; }
+    
+    /* Debug info */
+    .debug-info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      z-index: 1000;
+    }
+    
+    /* Seções de conteúdo */
+    .content-section {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    
+    .cta-button {
+      background: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    
+    .cta-button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- VÍDEO (sempre visível) -->
+    <section class="vsl" id="vsl">
+      <div style="text-align: center;">
+        <h2>🎥 Seu Vídeo Aqui</h2>
+        <p>Este vídeo sempre fica visível</p>
+      </div>
+    </section>
+
+    <!-- DEBUG INFO -->
+    <div class="debug-info" id="debugInfo">
+      <div>Status: <span id="lockStatus">Verificando...</span></div>
+      <div>Tempo restante: <span id="timeRemaining">--</span></div>
+      <div>Primeiro acesso: <span id="firstSeen">--</span></div>
+      <div>Liberado até: <span id="unlockedUntil">--</span></div>
+    </div>
+
+    <!-- TUDO QUE FICA ABAIXO DO VÍDEO -->
+    <section id="belowFold" class="below-fold locked" aria-hidden="true">
+      
+      <div class="content-section">
+        <h2>🎯 Seção 1 - Apresentação da Oferta</h2>
+        <p>Esta é a primeira seção que aparece após o tempo de bloqueio. Aqui você pode apresentar sua oferta principal, destacar benefícios e criar interesse no produto ou serviço.</p>
+        <button class="cta-button">Saiba Mais</button>
+      </div>
+
+      <div class="content-section">
+        <h2>💎 Seção 2 - Benefícios Exclusivos</h2>
+        <ul>
+          <li>✅ Benefício 1: Acesso vitalício ao conteúdo</li>
+          <li>✅ Benefício 2: Suporte personalizado</li>
+          <li>✅ Benefício 3: Garantia de 30 dias</li>
+          <li>✅ Benefício 4: Bônus exclusivos</li>
+        </ul>
+        <button class="cta-button">Quero Aproveitar</button>
+      </div>
+
+      <div class="content-section">
+        <h2>❓ FAQ - Perguntas Frequentes</h2>
+        <details>
+          <summary>Como funciona o acesso ao conteúdo?</summary>
+          <p>Após a compra, você recebe acesso imediato a todo o material através da nossa plataforma exclusiva.</p>
+        </details>
+        <details>
+          <summary>Existe garantia?</summary>
+          <p>Sim! Oferecemos garantia incondicional de 30 dias. Se não ficar satisfeito, devolvemos 100% do seu dinheiro.</p>
+        </details>
+        <details>
+          <summary>O conteúdo é atualizado?</summary>
+          <p>Sim, o conteúdo é constantemente atualizado e você tem acesso vitalício a todas as atualizações.</p>
+        </details>
+      </div>
+
+      <div class="content-section">
+        <h2>🔥 Oferta Especial - Por Tempo Limitado</h2>
+        <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px;">
+          <h3>De R$ 497 por apenas</h3>
+          <div style="font-size: 3rem; font-weight: bold; margin: 1rem 0;">R$ 197</div>
+          <p>⏰ Oferta válida apenas hoje!</p>
+          <button class="cta-button" style="background: #28a745; font-size: 18px; padding: 15px 30px;">
+            🛒 COMPRAR AGORA
+          </button>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>🎁 Bônus Exclusivos</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="padding: 1rem; border: 2px solid #ddd; border-radius: 8px;">
+            <h4>📚 Bônus 1: E-book Completo</h4>
+            <p>Material complementar em PDF com 100+ páginas</p>
+          </div>
+          <div style="padding: 1rem; border: 2px solid #ddd; border-radius: 8px;">
+            <h4>🎯 Bônus 2: Planilhas Práticas</h4>
+            <p>Templates prontos para aplicar imediatamente</p>
+          </div>
+          <div style="padding: 1rem; border: 2px solid #ddd; border-radius: 8px;">
+            <h4>👥 Bônus 3: Grupo VIP</h4>
+            <p>Acesso ao grupo exclusivo no Telegram</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      // ===== Config =====
+      const FALLBACK_SECONDS = 10; // Para teste: 10 segundos
+      const STORAGE_KEY_UNTIL = 'locker:unlockedUntil';
+      const STORAGE_KEY_START = 'locker:firstSeenAt';
+      const PERSIST_UNLOCK_MS = 6 * 3600 * 1000; // Após liberar, manter liberado por 6h
+
+      // ===== Elementos =====
+      const below = document.getElementById('belowFold');
+      const debugInfo = {
+        status: document.getElementById('lockStatus'),
+        timeRemaining: document.getElementById('timeRemaining'),
+        firstSeen: document.getElementById('firstSeen'),
+        unlockedUntil: document.getElementById('unlockedUntil')
+      };
+
+      // ===== Utils =====
+      const qs = new URLSearchParams(location.search);
+      const debugUnlock = qs.get('unlockNow') === '1';
+
+      function setLockedUI(locked) {
+        if (locked) {
+          below.classList.add('locked');
+          below.setAttribute('aria-hidden', 'true');
+          debugInfo.status.textContent = 'BLOQUEADO';
+        } else {
+          below.classList.remove('locked');
+          below.removeAttribute('aria-hidden');
+          debugInfo.status.textContent = 'LIBERADO';
+        }
+      }
+
+      function alreadyUnlocked() {
+        const until = parseInt(localStorage.getItem(STORAGE_KEY_UNTIL) || '0', 10);
+        return Date.now() < until;
+      }
+
+      function remainingMsFromStart(startMs, delaySeconds) {
+        const end = startMs + delaySeconds * 1000;
+        return Math.max(0, end - Date.now());
+      }
+
+      function persistUnlock() {
+        localStorage.setItem(STORAGE_KEY_UNTIL, String(Date.now() + PERSIST_UNLOCK_MS));
+      }
+
+      function updateDebugInfo() {
+        const firstSeen = localStorage.getItem(STORAGE_KEY_START);
+        const unlockedUntil = localStorage.getItem(STORAGE_KEY_UNTIL);
+        
+        debugInfo.firstSeen.textContent = firstSeen ? new Date(parseInt(firstSeen)).toLocaleTimeString() : 'Não definido';
+        debugInfo.unlockedUntil.textContent = unlockedUntil ? new Date(parseInt(unlockedUntil)).toLocaleTimeString() : 'Não definido';
+      }
+
+      function scheduleUnlock(ms) {
+        const target = Date.now() + ms;
+        const tick = () => {
+          const remaining = Math.max(0, target - Date.now());
+          debugInfo.timeRemaining.textContent = Math.ceil(remaining / 1000) + 's';
+          
+          if (Date.now() >= target) {
+            setLockedUI(false);
+            persistUnlock();
+            debugInfo.timeRemaining.textContent = '0s';
+            updateDebugInfo();
+          } else {
+            setTimeout(tick, 1000);
+          }
+        };
+        setTimeout(tick, 100);
+      }
+
+      async function main() {
+        // Garante que começa travado visualmente
+        setLockedUI(true);
+        updateDebugInfo();
+
+        // Debug: liberar imediato
+        if (debugUnlock) {
+          setLockedUI(false);
+          persistUnlock();
+          updateDebugInfo();
+          return;
+        }
+
+        // Se já estava liberado nesta máquina, manter
+        if (alreadyUnlocked()) {
+          setLockedUI(false);
+          debugInfo.timeRemaining.textContent = '0s (já liberado)';
+          updateDebugInfo();
+          return;
+        }
+
+        const delaySeconds = FALLBACK_SECONDS;
+
+        // Se definir 0, liberar direto
+        if (delaySeconds === 0) {
+          setLockedUI(false);
+          persistUnlock();
+          updateDebugInfo();
+          return;
+        }
+
+        // Marca o primeiro acesso, se ainda não marcado
+        let firstSeenAt = parseInt(localStorage.getItem(STORAGE_KEY_START) || '0', 10);
+        if (!firstSeenAt) {
+          firstSeenAt = Date.now();
+          localStorage.setItem(STORAGE_KEY_START, String(firstSeenAt));
+        }
+
+        // Calcula quanto falta a partir do primeiro acesso
+        const remaining = remainingMsFromStart(firstSeenAt, delaySeconds);
+
+        if (remaining <= 0) {
+          setLockedUI(false);
+          persistUnlock();
+          updateDebugInfo();
+          return;
+        }
+
+        // Agenda liberação silenciosa
+        scheduleUnlock(remaining);
+        updateDebugInfo();
+      }
+
+      main();
+      
+      // Botão para resetar teste
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'r' && e.ctrlKey) {
+          localStorage.removeItem(STORAGE_KEY_UNTIL);
+          localStorage.removeItem(STORAGE_KEY_START);
+          location.reload();
+        }
+      });
+      
+    })();
+  </script>
+  
+  <div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px;">
+    💡 Dicas de teste:<br>
+    • Ctrl+R: Resetar teste<br>
+    • ?unlockNow=1: Liberar imediato<br>
+    • Tempo de teste: 10 segundos
+  </div>
+</body>
+</html>

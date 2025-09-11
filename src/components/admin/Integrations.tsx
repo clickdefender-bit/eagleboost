@@ -134,8 +134,8 @@ fbq('track', 'PageView');
     <div className="space-y-8 text-white bg-slate-900 min-h-screen">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Integrations</h1>
-        <p className="text-slate-400">Manage your tracking pixels and analytics integrations</p>
+        <h1 className="text-3xl font-bold text-white">Integrações</h1>
+        <p className="text-slate-400">Gerencie seus pixels de rastreamento e integrações de analytics</p>
       </div>
 
       {/* Integration Cards */}
@@ -180,8 +180,8 @@ fbq('track', 'PageView');
                   integration.status === 'connected' ? 'text-green-600' :
                   integration.status === 'error' ? 'text-red-600' : 'text-slate-400'
                 }`}>
-                  {integration.status === 'connected' ? 'Connected' :
-                   integration.status === 'error' ? 'Error' : 'Disconnected'}
+                  {integration.status === 'connected' ? 'Conectado' :
+                   integration.status === 'error' ? 'Erro' : 'Desconectado'}
                 </span>
               </div>
               
@@ -193,12 +193,12 @@ fbq('track', 'PageView');
               )}
               
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Last Sync:</span>
+                <span className="text-slate-400">Última Sincronização:</span>
                 <span className="text-white">{integration.lastSync}</span>
               </div>
               
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Events Today:</span>
+                <span className="text-slate-400">Eventos Hoje:</span>
                 <span className="font-semibold text-white">{integration.events}</span>
               </div>
             </div>
@@ -210,7 +210,7 @@ fbq('track', 'PageView');
                   onClick={() => handleConnect(integration)}
                   className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Connect
+                  Conectar
                 </button>
               ) : (
                 <>
@@ -219,13 +219,13 @@ fbq('track', 'PageView');
                     className="flex-1 bg-slate-700 text-slate-300 px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
                   >
                     <Copy className="w-4 h-4" />
-                    Copy Code
+                    Copiar Código
                   </button>
                   <button
                     onClick={() => handleDisconnect(integration.id)}
                     className="px-4 py-2 text-red-400 border border-red-700 rounded-lg hover:bg-red-900/20 transition-colors"
                   >
-                    Disconnect
+                    Desconectar
                   </button>
                 </>
               )}
@@ -273,7 +273,7 @@ fbq('track', 'PageView');
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4 border border-slate-700">
             <h3 className="text-lg font-semibold text-white mb-4">
-              Connect {selectedIntegration.name}
+              Conectar {selectedIntegration.name}
             </h3>
             
             <div className="space-y-4">
@@ -293,7 +293,7 @@ fbq('track', 'PageView');
                   onClick={() => setShowPixelModal(false)}
                   className="flex-1 px-4 py-2 text-slate-300 border border-slate-600 rounded-lg hover:bg-slate-700"
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button
                   onClick={() => {
@@ -302,7 +302,7 @@ fbq('track', 'PageView');
                   }}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Connect
+                  Conectar
                 </button>
               </div>
             </div>
