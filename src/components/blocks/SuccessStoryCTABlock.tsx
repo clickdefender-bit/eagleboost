@@ -45,7 +45,7 @@ export const SuccessStoryCTABlock: React.FC = () => {
       {/* Main CTA Button */}
       <button
         onClick={handleSuccessStoryClick}
-        className={`w-full bg-gradient-to-r ${ctaConfig.backgroundColor} hover:opacity-90 ${ctaConfig.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 mb-4`}
+        className={`w-full bg-gradient-to-r ${ctaConfig.backgroundColor} hover:opacity-90 ${ctaConfig.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 mb-4 ${ctaConfig.usePulseAnimation ? 'pulse' : ''}`}
       >
         <div className="flex items-center justify-center gap-3">
           <span className="text-2xl">{ctaConfig.icon}</span>

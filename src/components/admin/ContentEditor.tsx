@@ -142,6 +142,7 @@ export const ContentEditor: React.FC = () => {
     { id: 'topBanner', name: 'Top Banner', icon: '🎯' },
     { id: 'video', name: 'Vídeo', icon: '🎥' },
     { id: 'contentBlocker', name: 'Bloqueio de Conteúdo', icon: '🔒' },
+    { id: 'customCTAs', name: 'CTAs Personalizados', icon: '🔘' },
     { id: 'mainOffer', name: 'Oferta Principal', icon: '💊' },
     { id: 'alternativeOffers', name: 'Ofertas Alternativas', icon: '📦' },
     { id: 'doctors', name: 'Médicos', icon: '👨‍⚕️' },
@@ -594,6 +595,51 @@ s.async=!0,document.head.appendChild(s);
           <div>
             <h3 className="text-xl font-bold text-white mb-6">Botões CTA Personalizados</h3>
             
+            {/* Configurações Globais */}
+            <div className="bg-slate-700 rounded-lg p-6 mb-6">
+              <h4 className="text-lg font-semibold text-white mb-4">Configurações Globais dos Botões</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor Padrão de Fundo</label>
+                  <select
+                    value={content.customCTAs.globalSettings.defaultBackgroundColor}
+                    onChange={(e) => handleInputChange('customCTAs.globalSettings.defaultBackgroundColor', e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                  >
+                    {content.customCTAs.globalSettings.availableColors.map((color) => (
+                      <option key={color.name} value={color.background}>{color.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor Padrão do Texto</label>
+                  <select
+                    value={content.customCTAs.globalSettings.defaultTextColor}
+                    onChange={(e) => handleInputChange('customCTAs.globalSettings.defaultTextColor', e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                  >
+                    <option value="text-white">Branco</option>
+                    <option value="text-black">Preto</option>
+                    <option value="text-gray-800">Cinza Escuro</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  handleInputChange('customCTAs.doctorTrustCTA.backgroundColor', content.customCTAs.globalSettings.defaultBackgroundColor);
+                  handleInputChange('customCTAs.doctorTrustCTA.textColor', content.customCTAs.globalSettings.defaultTextColor);
+                  handleInputChange('customCTAs.successStoryCTA.backgroundColor', content.customCTAs.globalSettings.defaultBackgroundColor);
+                  handleInputChange('customCTAs.successStoryCTA.textColor', content.customCTAs.globalSettings.defaultTextColor);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+              >
+                Aplicar Cores Padrão a Todos os Botões
+              </button>
+            </div>
+            
             {/* Doctor Trust CTA */}
             <div className="bg-slate-700 rounded-lg p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
@@ -661,6 +707,19 @@ s.async=!0,document.head.appendChild(s);
                     <option value="text-gray-800">Cinza Escuro</option>
                   </select>
                 </div>
+              </div>
+              
+              <div className="mt-4">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <span className="text-sm font-medium text-slate-300">Usar Animação Pulse</span>
+                  <input
+                    type="checkbox"
+                    checked={content.customCTAs.doctorTrustCTA.usePulseAnimation}
+                    onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.usePulseAnimation', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
               </div>
               
               <div className="mt-4">
@@ -746,6 +805,19 @@ s.async=!0,document.head.appendChild(s);
               </div>
               
               <div className="mt-4">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <span className="text-sm font-medium text-slate-300">Usar Animação Pulse</span>
+                  <input
+                    type="checkbox"
+                    checked={content.customCTAs.successStoryCTA.usePulseAnimation}
+                    onChange={(e) => handleInputChange('customCTAs.successStoryCTA.usePulseAnimation', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
+              <div className="mt-4">
                 <label className="block text-sm font-medium text-slate-300 mb-2">URL de Redirecionamento</label>
                 <input
                   type="url"
@@ -764,7 +836,7 @@ s.async=!0,document.head.appendChild(s);
               <div className="space-y-4">
                 {content.customCTAs.doctorTrustCTA.enabled && (
                   <div className="max-w-sm mx-auto">
-                    <button className={`w-full bg-gradient-to-r ${content.customCTAs.doctorTrustCTA.backgroundColor} ${content.customCTAs.doctorTrustCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300`}>
+                    <button className={`w-full bg-gradient-to-r ${content.customCTAs.doctorTrustCTA.backgroundColor} ${content.customCTAs.doctorTrustCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300 ${content.customCTAs.doctorTrustCTA.usePulseAnimation ? 'pulse' : ''}`}>
                       <div className="flex items-center justify-center gap-3">
                         <span className="text-2xl">{content.customCTAs.doctorTrustCTA.icon}</span>
                         <span className="text-center leading-tight text-sm">
@@ -777,7 +849,7 @@ s.async=!0,document.head.appendChild(s);
                 
                 {content.customCTAs.successStoryCTA.enabled && (
                   <div className="max-w-sm mx-auto">
-                    <button className={`w-full bg-gradient-to-r ${content.customCTAs.successStoryCTA.backgroundColor} ${content.customCTAs.successStoryCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300`}>
+                    <button className={`w-full bg-gradient-to-r ${content.customCTAs.successStoryCTA.backgroundColor} ${content.customCTAs.successStoryCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300 ${content.customCTAs.successStoryCTA.usePulseAnimation ? 'pulse' : ''}`}>
                       <div className="flex items-center justify-center gap-3">
                         <span className="text-2xl">{content.customCTAs.successStoryCTA.icon}</span>
                         <span className="text-center leading-tight text-sm">

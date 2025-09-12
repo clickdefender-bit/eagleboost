@@ -145,26 +145,6 @@ export interface SiteContent {
     }>;
   };
   
-  // Custom CTA Buttons
-  customCTAs: {
-    doctorTrustCTA: {
-      text: string;
-      icon: string;
-      backgroundColor: string;
-      textColor: string;
-      url: string;
-      enabled: boolean;
-    };
-    successStoryCTA: {
-      text: string;
-      icon: string;
-      backgroundColor: string;
-      textColor: string;
-      url: string;
-      enabled: boolean;
-    };
-  };
-  
   // Footer
   footer: {
     brandName: string;
@@ -190,7 +170,7 @@ const defaultContent: SiteContent = {
   },
 
   contentBlocker: {
-    enabled: true,
+    enabled: false,
     scheduleMode: 'immediate',
     unlockTimeMinutes: 1,
     unlockTimeSeconds: 0,
@@ -381,25 +361,6 @@ const defaultContent: SiteContent = {
         badgeText: "✓ Results or your money back"
       }
     ]
-  },
-  
-  customCTAs: {
-    doctorTrustCTA: {
-      text: "If doctors trust it, I trust it too — start my treatment now",
-      icon: "👨‍⚕️",
-      backgroundColor: "from-blue-500 to-blue-600",
-      textColor: "text-white",
-      url: "",
-      enabled: true
-    },
-    successStoryCTA: {
-      text: "I'm ready to be the next success story!",
-      icon: "🚀",
-      backgroundColor: "from-green-400 to-green-500",
-      textColor: "text-white",
-      url: "",
-      enabled: true
-    }
   },
   
   footer: {
