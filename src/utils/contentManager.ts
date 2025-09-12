@@ -145,28 +145,6 @@ export interface SiteContent {
     }>;
   };
   
-  // Custom CTAs
-  customCTAs: {
-    doctorTrustCTA: {
-      enabled: boolean;
-      title: string;
-      subtitle: string;
-      buttonText: string;
-      buttonUrl: string;
-    };
-    successStoryCTA: {
-      enabled: boolean;
-      title: string;
-      subtitle: string;
-      buttonText: string;
-      buttonUrl: string;
-    };
-    globalSettings: {
-      showAfterVideo: boolean;
-      delaySeconds: number;
-    };
-  };
-  
   // Footer
   footer: {
     brandName: string;
@@ -385,27 +363,6 @@ const defaultContent: SiteContent = {
     ]
   },
   
-  customCTAs: {
-    doctorTrustCTA: {
-      enabled: true,
-      title: "Doctor Approved Formula",
-      subtitle: "Clinically reviewed by medical professionals",
-      buttonText: "GET EAGLEBOOST NOW",
-      buttonUrl: ""
-    },
-    successStoryCTA: {
-      enabled: true,
-      title: "Join Thousands of Success Stories",
-      subtitle: "Real men, real results with EAGLEBOOST",
-      buttonText: "CLAIM YOUR BOTTLE",
-      buttonUrl: ""
-    },
-    globalSettings: {
-      showAfterVideo: true,
-      delaySeconds: 0
-    }
-  },
-  
   footer: {
     brandName: "EAGLEBOOST",
     copyright: "Copyright ©2025 | EAGLEBOOST",
@@ -464,22 +421,6 @@ class ContentManager {
         ...defaultContent.faq,
         ...stored.faq,
         items: stored.faq?.items || defaultContent.faq.items
-      },
-      customCTAs: {
-        ...defaultContent.customCTAs,
-        ...stored.customCTAs,
-        doctorTrustCTA: {
-          ...defaultContent.customCTAs.doctorTrustCTA,
-          ...stored.customCTAs?.doctorTrustCTA
-        },
-        successStoryCTA: {
-          ...defaultContent.customCTAs.successStoryCTA,
-          ...stored.customCTAs?.successStoryCTA
-        },
-        globalSettings: {
-          ...defaultContent.customCTAs.globalSettings,
-          ...stored.customCTAs?.globalSettings
-        }
       }
     };
   }
