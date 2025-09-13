@@ -143,13 +143,13 @@ export const DoctorCarousel: React.FC<DoctorCarouselProps> = ({ className = '' }
                   aspectRatio="9:16"
                   title={`Vídeo do Dr. ${doctor.name}`}
                   className="w-full h-full rounded-lg overflow-hidden"
-                  autoPlay={false}
+                className="w-full h-full object-cover"
                 />
               </div>
             </div>
           </div>
         ))}
-      </div>
+            <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
 
       {/* Navigation Dots */}
       <div className="flex justify-center gap-2 mb-4">
