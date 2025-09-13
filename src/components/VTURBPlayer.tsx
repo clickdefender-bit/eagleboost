@@ -25,7 +25,7 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
   /**
    * Extracts video URL from iframe onload attribute
    */
-  private extractVideoUrl(onloadAttr: string): string | null {
+  const extractVideoUrl = (onloadAttr: string): string | null => {
     try {
       // Look for patterns like: this.src="<url>" or this.src='<url>'
       const urlMatch = onloadAttr.match(/this\.src\s*=\s*["']([^"']+)["']/);
@@ -44,17 +44,17 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
       console.error('Error extracting video URL:', error);
       return null;
     }
-  }
+  };
 
   /**
    * Processes iframe element to extract and set video URL
    */
-  private processIframe(iframe: HTMLIFrameElement): void {
+  const processIframe = (iframe: HTMLIFrameElement): void => {
     const onloadAttr = iframe.getAttribute('onload');
     
     if (onloadAttr) {
       // Extract video URL from onload attribute
-      const videoUrl = this.extractVideoUrl(onloadAttr);
+      const videoUrl = extractVideoUrl(onloadAttr);
       
       if (videoUrl) {
         // Remove onload attribute to prevent conflicts
@@ -104,7 +104,7 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
         });
       }
     }
-  }
+  };
   useEffect(() => {
     if (!embedCode || !containerRef.current) {
       setIsLoading(false);
