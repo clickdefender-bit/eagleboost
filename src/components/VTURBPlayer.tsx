@@ -143,7 +143,7 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
       // Process all iframes in the embed code
       const iframes = tempDiv.querySelectorAll('iframe');
       iframes.forEach((iframe) => {
-        this.processIframe(iframe as HTMLIFrameElement);
+        processIframe(iframe as HTMLIFrameElement);
       });
       // Move todos os elementos do wrapper temporário para o container
       while (tempDiv.firstChild) {
