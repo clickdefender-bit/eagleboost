@@ -149,8 +149,6 @@ export const DoctorCarousel: React.FC<DoctorCarouselProps> = ({ className = '' }
           </div>
         ))}
       </div>
-            <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
-            </div>
 
       {/* Navigation Dots */}
       <div className="flex justify-center gap-2 mb-4">
