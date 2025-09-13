@@ -22,6 +22,89 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
+  /**
+   * Extracts video URL from iframe onload attribute
+   */
+  private extractVideoUrl(onloadAttr: string): string | null {
+    try {
+      // Look for patterns like: this.src="<url>" or this.src='<url>'
+      const urlMatch = onloadAttr.match(/this\.src\s*=\s*["']([^"']+)["']/);
+      if (urlMatch && urlMatch[1]) {
+        return urlMatch[1];
+      }
+      
+      // Alternative pattern: src="<url>"
+      const altMatch = onloadAttr.match(/src\s*=\s*["']([^"']+)["']/);
+      if (altMatch && altMatch[1]) {
+        return altMatch[1];
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error extracting video URL:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Processes iframe element to extract and set video URL
+   */
+  private processIframe(iframe: HTMLIFrameElement): void {
+    const onloadAttr = iframe.getAttribute('onload');
+    
+    if (onloadAttr) {
+      // Extract video URL from onload attribute
+      const videoUrl = this.extractVideoUrl(onloadAttr);
+      
+      if (videoUrl) {
+        // Remove onload attribute to prevent conflicts
+        iframe.removeAttribute('onload');
+        
+        // Set src directly
+        iframe.src = videoUrl;
+        
+        // Add load event listener
+        iframe.addEventListener('load', () => {
+          setIsLoading(false);
+          onLoad?.();
+        });
+        
+        // Add error event listener
+        iframe.addEventListener('error', () => {
+          const error = new Error('Failed to load VTURB video');
+          setHasError(true);
+          setIsLoading(false);
+          onError?.(error);
+        });
+        
+        console.log('🎥 VTURB iframe processed with URL:', videoUrl);
+      } else {
+        console.warn('⚠️ Could not extract video URL from onload attribute');
+        // Fallback: try to execute the original onload
+        try {
+          const func = new Function('iframe', onloadAttr.replace(/this/g, 'iframe'));
+          func(iframe);
+        } catch (error) {
+          console.error('Error executing iframe onload:', error);
+        }
+      }
+    } else {
+      // No onload attribute, iframe might already have src set
+      if (iframe.src && iframe.src !== 'about:blank') {
+        iframe.addEventListener('load', () => {
+          setIsLoading(false);
+          onLoad?.();
+        });
+        
+        iframe.addEventListener('error', () => {
+          const error = new Error('Failed to load VTURB video');
+          setHasError(true);
+          setIsLoading(false);
+          onError?.(error);
+        });
+      }
+    }
+  }
   useEffect(() => {
     if (!embedCode || !containerRef.current) {
       setIsLoading(false);
@@ -57,6 +140,11 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = modifiedEmbedCode;
       
+      // Process all iframes in the embed code
+      const iframes = tempDiv.querySelectorAll('iframe');
+      iframes.forEach((iframe) => {
+        this.processIframe(iframe as HTMLIFrameElement);
+      });
       // Move todos os elementos do wrapper temporário para o container
       while (tempDiv.firstChild) {
         container.appendChild(tempDiv.firstChild);
@@ -68,8 +156,13 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
       
       const loadNextScript = () => {
         if (scriptIndex >= containerScripts.length) {
-          setIsLoading(false);
-          onLoad?.();
+          // Only set loading to false if no iframes were processed
+          // (iframes will handle their own loading state)
+          const processedIframes = container.querySelectorAll('iframe');
+          if (processedIframes.length === 0) {
+            setIsLoading(false);
+            onLoad?.();
+          }
           return;
         }
         
