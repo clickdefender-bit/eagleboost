@@ -97,7 +97,7 @@ export const Login: React.FC = () => {
         </form>
 
         <div className="mt-6 text-center text-xs text-slate-500">
-          <p>Credenciais padrão: admin / eagleboost123</p>
+          
         </div>
       </div>
     </div>

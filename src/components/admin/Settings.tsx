@@ -1,16 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Save, Key, Globe, Bell, Shield, FileText, Image, Upload, CheckCircle, AlertCircle, RotateCw } from 'lucide-react';
+import { Save, Key, Globe, Bell, Shield, FileText, Image, Upload, CheckCircle, AlertCircle, RotateCw, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { MetadataService, PageMetadata } from '../../services/metadataService';
 import { useAdminConfig, adminConfigManager } from '../../utils/adminConfigManager';
 import { adminSyncService } from '../../utils/adminSyncService';
+import { useAuth } from '../../utils/authService';
 
 export const Settings: React.FC = () => {
   const { config, updateConfig, resetConfig, exportConfig, importConfig, getStats } = useAdminConfig();
+  const { updateCredentials } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [syncStatus, setSyncStatus] = useState(adminSyncService.getStatus());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+  
+  // Estados para alteração de credenciais
+  const [credentialsForm, setCredentialsForm] = useState({
+    currentPassword: '',
+    newUsername: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [credentialsStatus, setCredentialsStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [credentialsError, setCredentialsError] = useState('');
 
   useEffect(() => {
     // Atualiza status de sincronização periodicamente
@@ -112,6 +129,92 @@ export const Settings: React.FC = () => {
     adminSyncService.forcSync();
     setSyncStatus(adminSyncService.getStatus());
     alert('Sincronização forçada executada!');
+  };
+  
+  const handleCredentialsChange = (field: string, value: string) => {
+    setCredentialsForm(prev => ({ ...prev, [field]: value }));
+    setCredentialsError('');
+  };
+  
+  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  
+  const validateCredentials = () => {
+    if (!credentialsForm.newUsername.trim()) {
+      setCredentialsError('Nome de usuário é obrigatório');
+      return false;
+    }
+    
+    if (credentialsForm.newUsername.length < 3) {
+      setCredentialsError('Nome de usuário deve ter pelo menos 3 caracteres');
+      return false;
+    }
+    
+    if (!credentialsForm.newPassword) {
+      setCredentialsError('Nova senha é obrigatória');
+      return false;
+    }
+    
+    if (credentialsForm.newPassword.length < 6) {
+      setCredentialsError('Nova senha deve ter pelo menos 6 caracteres');
+      return false;
+    }
+    
+    if (credentialsForm.newPassword !== credentialsForm.confirmPassword) {
+      setCredentialsError('Confirmação de senha não confere');
+      return false;
+    }
+    
+    return true;
+  };
+  
+  const handleUpdateCredentials = async () => {
+    if (!validateCredentials()) return;
+    
+    setCredentialsStatus('saving');
+    setCredentialsError('');
+    
+    try {
+      // Atualiza as credenciais
+      updateCredentials(credentialsForm.newUsername, credentialsForm.newPassword);
+      
+      // Limpa o formulário
+      setCredentialsForm({
+        currentPassword: '',
+        newUsername: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+      setCredentialsStatus('saved');
+      setTimeout(() => setCredentialsStatus('idle'), 3000);
+      
+      alert('Credenciais atualizadas com sucesso! Você precisará fazer login novamente.');
+    } catch (error) {
+      console.error('Erro ao atualizar credenciais:', error);
+      setCredentialsError('Erro ao atualizar credenciais');
+      setCredentialsStatus('error');
+      setTimeout(() => setCredentialsStatus('idle'), 3000);
+    }
+  };
+  
+  const getCredentialsStatusIcon = () => {
+    switch (credentialsStatus) {
+      case 'saving': return <RotateCw className="w-4 h-4 animate-spin text-blue-400" />;
+      case 'saved': return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case 'error': return <AlertCircle className="w-4 h-4 text-red-400" />;
+      default: return <Lock className="w-4 h-4" />;
+    }
+  };
+  
+  const getCredentialsStatusText = () => {
+    switch (credentialsStatus) {
+      case 'saving': return 'Atualizando...';
+      case 'saved': return 'Atualizado!';
+      case 'error': return 'Erro ao atualizar';
+      default: return 'Atualizar Credenciais';
+    }
   };
 
   const triggerFileUpload = () => {
@@ -348,6 +451,122 @@ export const Settings: React.FC = () => {
             <p className="text-xs text-slate-400 mt-1">
               Ícone que aparece na aba do navegador (formato .ico, .png ou .svg)
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Security Settings */}
+      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="flex items-center gap-3 mb-6">
+          <Lock className="w-6 h-6 text-red-600" />
+          <h3 className="text-lg font-semibold text-white">Segurança</h3>
+        </div>
+        
+        <div className="space-y-6">
+          <div className="bg-slate-700 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-white mb-4">Alterar Credenciais de Acesso</h4>
+            
+            {credentialsError && (
+              <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded-lg flex items-center gap-2 text-red-300">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+                {credentialsError}
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Novo Nome de Usuário
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-4 w-4 text-slate-500" />
+                  </div>
+                  <input
+                    type="text"
+                    value={credentialsForm.newUsername}
+                    onChange={(e) => handleCredentialsChange('newUsername', e.target.value)}
+                    placeholder="Digite o novo usuário"
+                    className="w-full pl-10 pr-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Nova Senha
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-slate-500" />
+                  </div>
+                  <input
+                    type={showPasswords.new ? 'text' : 'password'}
+                    value={credentialsForm.newPassword}
+                    onChange={(e) => handleCredentialsChange('newPassword', e.target.value)}
+                    placeholder="Digite a nova senha"
+                    className="w-full pl-10 pr-10 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('new')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
+                  >
+                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Confirmar Nova Senha
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-slate-500" />
+                  </div>
+                  <input
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    value={credentialsForm.confirmPassword}
+                    onChange={(e) => handleCredentialsChange('confirmPassword', e.target.value)}
+                    placeholder="Confirme a nova senha"
+                    className="w-full pl-10 pr-10 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('confirm')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
+                  >
+                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleUpdateCredentials}
+                disabled={credentialsStatus === 'saving' || !credentialsForm.newUsername || !credentialsForm.newPassword || !credentialsForm.confirmPassword}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
+                  credentialsStatus === 'saving' 
+                    ? 'bg-blue-500 cursor-not-allowed' 
+                    : credentialsStatus === 'saved'
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : credentialsStatus === 'error'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed'
+                } text-white`}
+              >
+                {getCredentialsStatusIcon()}
+                {getCredentialsStatusText()}
+              </button>
+            </div>
+            
+            <div className="mt-3 text-xs text-slate-400">
+              <p>• Nome de usuário deve ter pelo menos 3 caracteres</p>
+              <p>• Senha deve ter pelo menos 6 caracteres</p>
+              <p>• Após alterar as credenciais, você precisará fazer login novamente</p>
+            </div>
           </div>
         </div>
       </div>
