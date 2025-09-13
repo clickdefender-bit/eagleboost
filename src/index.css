@@ -5,6 +5,7 @@
 /* Previne scroll horizontal na página inteira */
 html, body {
   overflow-x: hidden;
+  background: transparent;
 }
 
 /* Animação pulse para botões CTA */

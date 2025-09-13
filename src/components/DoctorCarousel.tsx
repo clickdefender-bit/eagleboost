@@ -45,6 +45,8 @@ export const DoctorCarousel: React.FC<DoctorCarouselProps> = ({ className = '' }
     });
   };
 
+
+
   const getCardStyle = (index: number) => {
     const diff = index - currentIndex;
     const totalCards = doctors.length;
@@ -98,7 +100,7 @@ export const DoctorCarousel: React.FC<DoctorCarouselProps> = ({ className = '' }
             className="absolute inset-0 transition-all duration-700 ease-in-out"
             style={getCardStyle(index)}
           >
-            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col mx-2">
+            <div className="bg-white rounded-2xl shadow-xl p-6 h-full flex flex-col mx-2">
               {/* Doctor Header */}
               <div className="flex items-center gap-3 mb-3">
                 <div className="relative">
@@ -135,12 +137,13 @@ export const DoctorCarousel: React.FC<DoctorCarouselProps> = ({ className = '' }
               </div>
 
               {/* VTURB Video */}
-              <div className="w-full min-h-[120px]">
+              <div className="w-full h-48 bg-gray-100 rounded-lg">
                 <VTURBVideoEmbed 
                   embedCode={doctor.videoEmbed}
-                  aspectRatio="16:9"
+                  aspectRatio="9:16"
                   title={`Vídeo do Dr. ${doctor.name}`}
                   className="w-full h-full rounded-lg overflow-hidden"
+                  autoPlay={false}
                 />
               </div>
             </div>

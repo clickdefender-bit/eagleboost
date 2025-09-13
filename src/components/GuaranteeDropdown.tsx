@@ -25,7 +25,7 @@ export const GuaranteeDropdown: React.FC<GuaranteeDropdownProps> = ({ className 
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
         {/* Header - Always Visible */}
         <div 
-          className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+          className="flex items-center justify-between p-4 cursor-pointer hover:bg-blue-50 hover:shadow-md transition-all duration-200 border-l-4 border-transparent hover:border-blue-400"
           onClick={handleToggle}
         >
           <div className="flex items-center gap-4">
@@ -63,7 +63,7 @@ export const GuaranteeDropdown: React.FC<GuaranteeDropdownProps> = ({ className 
           </div>
           
           {/* Chevron Icon */}
-          <div className="text-blue-600">
+          <div className="text-blue-600 transition-transform duration-200 hover:scale-110">
             {isOpen ? (
               <ChevronUp className="w-6 h-6" />
             ) : (

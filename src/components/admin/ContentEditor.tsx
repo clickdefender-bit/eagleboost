@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Download, Upload, RotateCcw, Edit3, Plus, Trash2 } from 'lucide-react';
+import { Save, Download, Upload, RotateCcw, Edit3, Plus, Trash2, Palette } from 'lucide-react';
 import { contentManager, SiteContent } from '../../utils/contentManager';
 
 export const ContentEditor: React.FC = () => {
   const [content, setContent] = useState<SiteContent>(contentManager.getContent());
+  const [tempContent, setTempContent] = useState<SiteContent>(contentManager.getContent());
   const [activeSection, setActiveSection] = useState<string>('topBanner');
   const [hasChanges, setHasChanges] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
+  const [customColor, setCustomColor] = useState<string>('#BE1D1E');
 
   useEffect(() => {
     const handleContentUpdate = (event: CustomEvent) => {
-      setContent(event.detail);
+      const newContent = event.detail;
+      setContent(newContent);
+      setTempContent(newContent);
       setHasChanges(false);
     };
 
@@ -20,22 +25,24 @@ export const ContentEditor: React.FC = () => {
 
   const handleInputChange = (path: string, value: any) => {
     const keys = path.split('.');
-    const newContent = { ...content };
-    let current: any = newContent;
+    const newTempContent = { ...tempContent };
+    let current: any = newTempContent;
     
     for (let i = 0; i < keys.length - 1; i++) {
       current = current[keys[i]];
     }
     current[keys[keys.length - 1]] = value;
     
-    setContent(newContent);
+    setTempContent(newTempContent);
     setHasChanges(true);
+    
+    // Não salvar automaticamente - apenas atualizar estado temporário
   };
 
   const handleArrayChange = (path: string, index: number, field: string, value: any) => {
     const keys = path.split('.');
-    const newContent = { ...content };
-    let current: any = newContent;
+    const newTempContent = { ...tempContent };
+    let current: any = newTempContent;
     
     for (let i = 0; i < keys.length; i++) {
       if (i === keys.length - 1) {
@@ -45,14 +52,14 @@ export const ContentEditor: React.FC = () => {
       }
     }
     
-    setContent(newContent);
+    setTempContent(newTempContent);
     setHasChanges(true);
   };
 
   const addArrayItem = (path: string, template: any) => {
     const keys = path.split('.');
-    const newContent = { ...content };
-    let current: any = newContent;
+    const newTempContent = { ...tempContent };
+    let current: any = newTempContent;
     
     for (let i = 0; i < keys.length; i++) {
       if (i === keys.length - 1) {
@@ -63,14 +70,14 @@ export const ContentEditor: React.FC = () => {
       }
     }
     
-    setContent(newContent);
+    setTempContent(newTempContent);
     setHasChanges(true);
   };
 
   const removeArrayItem = (path: string, index: number) => {
     const keys = path.split('.');
-    const newContent = { ...content };
-    let current: any = newContent;
+    const newTempContent = { ...tempContent };
+    let current: any = newTempContent;
     
     for (let i = 0; i < keys.length; i++) {
       if (i === keys.length - 1) {
@@ -80,15 +87,18 @@ export const ContentEditor: React.FC = () => {
       }
     }
     
-    setContent(newContent);
+    setTempContent(newTempContent);
     setHasChanges(true);
   };
 
   const handleSave = async () => {
     setSaveStatus('saving');
     try {
-      console.log('💾 Admin: Saving content with title:', content.topBanner.title);
-      contentManager.updateContent(content);
+      console.log('💾 Admin: Saving content with title:', tempContent.topBanner.title);
+      contentManager.updateContent(tempContent);
+      
+      // Atualizar o conteúdo principal com as alterações salvas
+      setContent(tempContent);
       
       setSaveStatus('saved');
       setHasChanges(false);
@@ -119,7 +129,9 @@ export const ContentEditor: React.FC = () => {
       reader.onload = (e) => {
         const content = e.target?.result as string;
         if (contentManager.importContent(content)) {
-          setContent(contentManager.getContent());
+          const newContent = contentManager.getContent();
+          setContent(newContent);
+          setTempContent(newContent);
           setHasChanges(false);
           alert('Conteúdo importado com sucesso!');
         } else {
@@ -133,7 +145,16 @@ export const ContentEditor: React.FC = () => {
   const handleResetar = () => {
     if (confirm('Tem certeza que deseja resetar todo o conteúdo para o padrão?')) {
       contentManager.resetToDefault();
-      setContent(contentManager.getContent());
+      const newContent = contentManager.getContent();
+      setContent(newContent);
+      setTempContent(newContent);
+      setHasChanges(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    if (confirm('Tem certeza que deseja descartar todas as alterações não salvas?')) {
+      setTempContent(content);
       setHasChanges(false);
     }
   };
@@ -142,7 +163,9 @@ export const ContentEditor: React.FC = () => {
     { id: 'topBanner', name: 'Top Banner', icon: '🎯' },
     { id: 'video', name: 'Vídeo', icon: '🎥' },
     { id: 'contentBlocker', name: 'Bloqueio de Conteúdo', icon: '🔒' },
+    { id: 'titleBlocks', name: 'Blocos de Título', icon: '📝' },
     { id: 'customCTAs', name: 'CTAs Personalizados', icon: '🔘' },
+    { id: 'globalBackground', name: 'Background Global', icon: '🎨' },
     { id: 'mainOffer', name: 'Oferta Principal', icon: '💊' },
     { id: 'alternativeOffers', name: 'Ofertas Alternativas', icon: '📦' },
     { id: 'doctors', name: 'Médicos', icon: '👨‍⚕️' },
@@ -155,7 +178,7 @@ export const ContentEditor: React.FC = () => {
 
   const renderInput = (label: string, path: string, type: 'text' | 'textarea' | 'url' = 'text') => {
     const keys = path.split('.');
-    let value: any = content;
+    let value: any = tempContent;
     for (const key of keys) {
       value = value[key];
     }
@@ -181,6 +204,138 @@ export const ContentEditor: React.FC = () => {
             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
             placeholder={isNumberField ? "0" : ""}
           />
+        )}
+      </div>
+    );
+  };
+
+  const renderColorSelect = (label: string, path: string, options: Array<{value: string, label: string}>) => {
+    const keys = path.split('.');
+    let value: any = content;
+    for (const key of keys) {
+      value = value[key];
+    }
+
+    const pickerId = `${path}-color-picker`;
+    const isCustomColor = !options.some(opt => opt.value === value);
+
+    // Função para determinar o prefixo correto baseado no tipo de cor
+    const getColorPrefix = (colorValue: string) => {
+      if (path.includes('buttonColor') || path.includes('background')) {
+        // Para cores hexadecimais, aplicar bg-[]
+        if (colorValue.startsWith('#')) {
+          return `bg-[${colorValue}]`;
+        }
+        // Para gradientes ou classes Tailwind existentes, retornar como está
+        if (colorValue.includes('gradient') || colorValue.startsWith('bg-') || colorValue.startsWith('from-')) {
+          return colorValue;
+        }
+        // Para outras cores, adicionar prefixo bg-
+        return `bg-${colorValue}`;
+      } else {
+        return colorValue.startsWith('#') ? `text-[${colorValue}]` : colorValue;
+      }
+    };
+
+    return (
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-slate-300 mb-2">{label}</label>
+        <div className="flex gap-2">
+          <select
+            value={isCustomColor ? 'custom' : value}
+            onChange={(e) => {
+              if (e.target.value === 'custom') {
+                setColorPickerOpen(pickerId);
+              } else {
+                handleInputChange(path, e.target.value);
+              }
+            }}
+            className="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+          >
+            {options.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+            <option value="custom">🎨 Cor Personalizada</option>
+          </select>
+          
+          <button
+            onClick={() => setColorPickerOpen(colorPickerOpen === pickerId ? null : pickerId)}
+            className="px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg hover:bg-slate-500 text-white flex items-center gap-1"
+            title="Seletor de Cor"
+          >
+            <Palette size={16} />
+          </button>
+        </div>
+        
+        {colorPickerOpen === pickerId && (
+          <div className="mt-2 p-3 bg-slate-600 rounded-lg border border-slate-500">
+            <h6 className="text-sm font-medium text-slate-300 mb-3">Cores Sólidas</h6>
+            <div className="grid grid-cols-8 gap-2 mb-4">
+              {[
+                '#BE1D1E', '#DC2626', '#EF4444', '#F87171',
+                '#1E40AF', '#2563EB', '#3B82F6', '#60A5FA',
+                '#059669', '#10B981', '#34D399', '#6EE7B7',
+                '#7C2D12', '#EA580C', '#F97316', '#FB923C',
+                '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD',
+                '#DB2777', '#EC4899', '#F472B6', '#F9A8D4',
+                '#374151', '#4B5563', '#6B7280', '#9CA3AF',
+                '#000000', '#1F2937', '#FFFFFF', '#F3F4F6'
+              ].map((color) => (
+                <button
+                  key={color}
+                  onClick={() => {
+                    const tailwindColor = getColorPrefix(color);
+                    handleInputChange(path, tailwindColor);
+                    setColorPickerOpen(null);
+                  }}
+                  className="w-8 h-8 rounded border-2 border-slate-400 hover:border-white transition-colors"
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
+            
+            <h6 className="text-sm font-medium text-slate-300 mb-3">Gradientes</h6>
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {[
+                { name: 'Sunset', class: 'bg-gradient-to-r from-orange-400 to-red-500' },
+                { name: 'Ocean', class: 'bg-gradient-to-r from-blue-400 to-blue-600' },
+                { name: 'Forest', class: 'bg-gradient-to-r from-green-400 to-green-600' },
+                { name: 'Purple', class: 'bg-gradient-to-r from-purple-400 to-purple-600' },
+                { name: 'Pink', class: 'bg-gradient-to-r from-pink-400 to-pink-600' },
+                { name: 'Teal', class: 'bg-gradient-to-r from-teal-400 to-teal-600' },
+                { name: 'Indigo', class: 'bg-gradient-to-r from-indigo-400 to-indigo-600' },
+                { name: 'Gray', class: 'bg-gradient-to-r from-gray-400 to-gray-600' },
+                { name: 'Fire', class: 'bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500' },
+                { name: 'Sky', class: 'bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600' },
+                { name: 'Emerald', class: 'bg-gradient-to-r from-emerald-400 to-cyan-400' },
+                { name: 'Rose', class: 'bg-gradient-to-r from-rose-400 to-pink-400' }
+              ].map((gradient) => (
+                <button
+                  key={gradient.name}
+                  onClick={() => {
+                    handleInputChange(path, gradient.class);
+                    setColorPickerOpen(null);
+                  }}
+                  className={`h-12 rounded border-2 border-slate-400 hover:border-white transition-colors ${gradient.class}`}
+                  title={gradient.name}
+                />
+              ))}
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={() => setColorPickerOpen(null)}
+                className="px-3 py-1 bg-slate-500 text-white rounded text-sm hover:bg-slate-400"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {isCustomColor && (
+          <p className="text-xs text-slate-400 mt-1">Cor personalizada: {value}</p>
         )}
       </div>
     );
@@ -247,6 +402,32 @@ export const ContentEditor: React.FC = () => {
             {renderInput('Título', 'topBanner.title')}
             {renderInput('Subtítulo', 'topBanner.subtitle', 'textarea')}
             {renderInput('Texto do Botão', 'topBanner.buttonText')}
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div>
+                {renderColorSelect(
+                  'Cor do Título',
+                  'topBanner.titleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+              
+              <div>
+                {renderColorSelect(
+                  'Cor do Subtítulo',
+                  'topBanner.subtitleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+              
+              <div>
+                {renderColorSelect(
+                  'Cor do Botão',
+                  'topBanner.buttonColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+            </div>
           </div>
         );
 
@@ -260,7 +441,7 @@ export const ContentEditor: React.FC = () => {
                 Código Embed da VTURB
               </label>
               <textarea
-                value={content.video.embedCode || ''}
+                value={tempContent.video.embedCode || ''}
                 onChange={(e) => handleInputChange('video.embedCode', e.target.value)}
                 placeholder='Cole aqui o código embed da VTURB, exemplo:
 <vturb-smartplayer id="vid-68c1baf2d111494b6113b2dc" style="display: block; margin: 0 auto; width: 100%;"></vturb-smartplayer>
@@ -282,7 +463,7 @@ s.async=!0,document.head.appendChild(s);
                 Proporção do Vídeo
               </label>
               <select
-                value={content.video.aspectRatio}
+                value={tempContent.video.aspectRatio}
                 onChange={(e) => handleInputChange('video.aspectRatio', e.target.value as '16:9' | '9:16')}
                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
               >
@@ -311,7 +492,7 @@ s.async=!0,document.head.appendChild(s);
               <label className="flex items-center gap-3 text-white">
                 <input
                   type="checkbox"
-                  checked={content.contentBlocker.enabled}
+                  checked={tempContent.contentBlocker.enabled}
                   onChange={(e) => handleInputChange('contentBlocker.enabled', e.target.checked)}
                   className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
                 />
@@ -319,7 +500,7 @@ s.async=!0,document.head.appendChild(s);
               </label>
             </div>
             
-            {content.contentBlocker.enabled && (
+            {tempContent.contentBlocker.enabled && (
               <>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -377,6 +558,92 @@ s.async=!0,document.head.appendChild(s);
           </div>
         );
 
+      case 'titleBlocks':
+        return (
+          <div>
+            <h3 className="text-xl font-bold text-white mb-6">Blocos de Título</h3>
+            <p className="text-slate-400 mb-6">
+              Configure os títulos e subtítulos dos blocos principais da página.
+            </p>
+            
+            <h4 className="text-lg font-semibold text-white mb-4">TITULO 1</h4>
+            {renderInput('Título', 'titleBlocks.noFilters.title')}
+            {renderInput('Subtítulo', 'titleBlocks.noFilters.subtitle')}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                {renderColorSelect(
+                  'Cor do Título',
+                  'titleBlocks.noFilters.titleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+              
+              <div>
+                {renderColorSelect(
+                  'Cor do Subtítulo',
+                  'titleBlocks.noFilters.subtitleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+            </div>
+            
+            <h4 className="text-lg font-semibold text-white mb-4 mt-6">TITULO 2</h4>
+            {renderInput('Título', 'titleBlocks.newsOutlets.title')}
+            {renderInput('Subtítulo', 'titleBlocks.newsOutlets.subtitle')}
+            {renderInput('Instrução de Navegação', 'titleBlocks.newsOutlets.dragInstruction')}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                {renderColorSelect(
+                  'Cor do Título',
+                  'titleBlocks.newsOutlets.titleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+              
+              <div>
+                {renderColorSelect(
+                  'Cor do Subtítulo',
+                  'titleBlocks.newsOutlets.subtitleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+            </div>
+            
+            <h4 className="text-lg font-semibold text-white mb-4 mt-6">TITULO 3</h4>
+            {renderInput('Título', 'titleBlocks.transformLife.title')}
+            {renderInput('Subtítulo 1', 'titleBlocks.transformLife.subtitle1')}
+            {renderInput('Subtítulo 2', 'titleBlocks.transformLife.subtitle2')}
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                {renderColorSelect(
+                  'Cor do Título',
+                  'titleBlocks.transformLife.titleColor',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+              
+              <div>
+                {renderColorSelect(
+                  'Cor do Subtítulo 1',
+                  'titleBlocks.transformLife.subtitle1Color',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+              
+              <div>
+                {renderColorSelect(
+                  'Cor do Subtítulo 2',
+                  'titleBlocks.transformLife.subtitle2Color',
+                  content.globalTitleStyling.availableColors.map(color => ({ label: color.name, value: color.value }))
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
       case 'mainOffer':
         return (
           <div>
@@ -404,20 +671,26 @@ s.async=!0,document.head.appendChild(s);
             
             <h4 className="text-lg font-semibold text-white mb-4">Oferta 1</h4>
             {renderInput('Imagem do Produto', 'alternativeOffers.offer1.productImage', 'url')}
+            {renderInput('Nome do Produto', 'alternativeOffers.offer1.productName')}
             {renderInput('Nome do Pacote', 'alternativeOffers.offer1.packageName')}
             {renderInput('Economia', 'alternativeOffers.offer1.savings')}
             {renderInput('Preço por Frasco', 'alternativeOffers.offer1.pricePerBottle')}
             {renderInput('Preço Total', 'alternativeOffers.offer1.totalPrice')}
             {renderInput('Frete', 'alternativeOffers.offer1.shipping')}
+            {renderInput('Garantia', 'alternativeOffers.offer1.guarantee')}
+            {renderInput('Segurança', 'alternativeOffers.offer1.security')}
             {renderInput('URL do Botão', 'alternativeOffers.offer1.buttonUrl', 'url')}
             
             <h4 className="text-lg font-semibold text-white mb-4 mt-6">Oferta 2</h4>
             {renderInput('Imagem do Produto', 'alternativeOffers.offer2.productImage', 'url')}
+            {renderInput('Nome do Produto', 'alternativeOffers.offer2.productName')}
             {renderInput('Nome do Pacote', 'alternativeOffers.offer2.packageName')}
             {renderInput('Economia', 'alternativeOffers.offer2.savings')}
             {renderInput('Preço por Frasco', 'alternativeOffers.offer2.pricePerBottle')}
             {renderInput('Preço Total', 'alternativeOffers.offer2.totalPrice')}
             {renderInput('Frete', 'alternativeOffers.offer2.shipping')}
+            {renderInput('Garantia', 'alternativeOffers.offer2.guarantee')}
+            {renderInput('Segurança', 'alternativeOffers.offer2.security')}
             {renderInput('URL do Botão', 'alternativeOffers.offer2.buttonUrl', 'url')}
           </div>
         );
@@ -433,7 +706,7 @@ s.async=!0,document.head.appendChild(s);
             {renderArrayEditor(
               'Médicos',
               'doctors.doctors',
-              content.doctors.doctors,
+              tempContent.doctors.doctors,
               {
                 name: '',
                 title: '',
@@ -464,7 +737,7 @@ s.async=!0,document.head.appendChild(s);
             {renderArrayEditor(
               'Clientes',
               'testimonials.customers',
-              content.testimonials.customers,
+              tempContent.testimonials.customers,
               {
                 name: '',
                 location: '',
@@ -496,7 +769,7 @@ s.async=!0,document.head.appendChild(s);
             {renderArrayEditor(
               'Artigos',
               'news.articles',
-              content.news.articles,
+              tempContent.news.articles,
               {
                 outlet: '',
                 logo: '',
@@ -528,12 +801,12 @@ s.async=!0,document.head.appendChild(s);
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-300 mb-2">Descrições</label>
-              {content.guarantee.description.map((desc, index) => (
+              {tempContent.guarantee.description.map((desc, index) => (
                 <div key={index} className="flex gap-2 mb-2">
                   <textarea
                     value={desc}
                     onChange={(e) => {
-                      const newDescriptions = [...content.guarantee.description];
+                      const newDescriptions = [...tempContent.guarantee.description];
                       newDescriptions[index] = e.target.value;
                       handleInputChange('guarantee.description', newDescriptions);
                     }}
@@ -542,7 +815,7 @@ s.async=!0,document.head.appendChild(s);
                   />
                   <button
                     onClick={() => {
-                      const newDescriptions = content.guarantee.description.filter((_, i) => i !== index);
+                      const newDescriptions = tempContent.guarantee.description.filter((_, i) => i !== index);
                       handleInputChange('guarantee.description', newDescriptions);
                     }}
                     className="text-red-400 hover:text-red-300"
@@ -553,7 +826,7 @@ s.async=!0,document.head.appendChild(s);
               ))}
               <button
                 onClick={() => {
-                  const newDescriptions = [...content.guarantee.description, ''];
+                  const newDescriptions = [...tempContent.guarantee.description, ''];
                   handleInputChange('guarantee.description', newDescriptions);
                 }}
                 className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
@@ -574,7 +847,7 @@ s.async=!0,document.head.appendChild(s);
             {renderArrayEditor(
               'Perguntas',
               'faq.items',
-              content.faq.items,
+              tempContent.faq.items,
               {
                 question: '',
                 answer: '',
@@ -603,36 +876,30 @@ s.async=!0,document.head.appendChild(s);
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Cor Padrão de Fundo</label>
                   <select
-                    value={content.customCTAs.globalSettings.defaultBackgroundColor}
+                    value={tempContent.customCTAs.globalSettings.defaultBackgroundColor}
                     onChange={(e) => handleInputChange('customCTAs.globalSettings.defaultBackgroundColor', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                   >
-                    {content.customCTAs.globalSettings.availableColors.map((color) => (
+                    {tempContent.customCTAs.globalSettings.availableColors.map((color) => (
                       <option key={color.name} value={color.background}>{color.name}</option>
                     ))}
                   </select>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor Padrão do Texto</label>
-                  <select
-                    value={content.customCTAs.globalSettings.defaultTextColor}
-                    onChange={(e) => handleInputChange('customCTAs.globalSettings.defaultTextColor', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                  >
-                    <option value="text-white">Branco</option>
-                    <option value="text-black">Preto</option>
-                    <option value="text-gray-800">Cinza Escuro</option>
-                  </select>
-                </div>
+                {renderColorSelect('Cor Padrão do Texto', 'customCTAs.globalSettings.defaultTextColor', [
+                  { value: 'text-white', label: 'Branco' },
+                  { value: 'text-black', label: 'Preto' },
+                  { value: 'text-gray-800', label: 'Cinza Escuro' },
+                  { value: 'text-[#BE1D1E]', label: 'Vermelho Forte' }
+                ])}
               </div>
               
               <button
                 onClick={() => {
-                  handleInputChange('customCTAs.doctorTrustCTA.backgroundColor', content.customCTAs.globalSettings.defaultBackgroundColor);
-                  handleInputChange('customCTAs.doctorTrustCTA.textColor', content.customCTAs.globalSettings.defaultTextColor);
-                  handleInputChange('customCTAs.successStoryCTA.backgroundColor', content.customCTAs.globalSettings.defaultBackgroundColor);
-                  handleInputChange('customCTAs.successStoryCTA.textColor', content.customCTAs.globalSettings.defaultTextColor);
+                  handleInputChange('customCTAs.doctorTrustCTA.backgroundColor', tempContent.customCTAs.globalSettings.defaultBackgroundColor);
+              handleInputChange('customCTAs.doctorTrustCTA.textColor', tempContent.customCTAs.globalSettings.defaultTextColor);
+              handleInputChange('customCTAs.successStoryCTA.backgroundColor', tempContent.customCTAs.globalSettings.defaultBackgroundColor);
+              handleInputChange('customCTAs.successStoryCTA.textColor', tempContent.customCTAs.globalSettings.defaultTextColor);
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
               >
@@ -647,7 +914,7 @@ s.async=!0,document.head.appendChild(s);
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={content.customCTAs.doctorTrustCTA.enabled}
+                    checked={tempContent.customCTAs.doctorTrustCTA.enabled}
                     onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.enabled', e.target.checked)}
                     className="sr-only peer"
                   />
@@ -659,7 +926,7 @@ s.async=!0,document.head.appendChild(s);
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Texto do Botão</label>
                   <textarea
-                    value={content.customCTAs.doctorTrustCTA.text}
+                    value={tempContent.customCTAs.doctorTrustCTA.text}
                     onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.text', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400 resize-vertical min-h-[60px]"
                     rows={2}
@@ -670,43 +937,30 @@ s.async=!0,document.head.appendChild(s);
                   <label className="block text-sm font-medium text-slate-300 mb-2">Ícone (Emoji)</label>
                   <input
                     type="text"
-                    value={content.customCTAs.doctorTrustCTA.icon}
+                    value={tempContent.customCTAs.doctorTrustCTA.icon}
                     onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.icon', e.target.value)}
                     placeholder="👨‍⚕️"
                     className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor de Fundo (Gradient)</label>
-                  <select
-                    value={content.customCTAs.doctorTrustCTA.backgroundColor}
-                    onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.backgroundColor', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                  >
-                    <option value="from-blue-500 to-blue-600">Azul</option>
-                    <option value="from-green-400 to-green-500">Verde</option>
-                    <option value="from-red-500 to-red-600">Vermelho</option>
-                    <option value="from-purple-500 to-purple-600">Roxo</option>
-                    <option value="from-orange-400 to-orange-500">Laranja</option>
-                    <option value="from-yellow-400 to-yellow-500">Amarelo</option>
-                    <option value="from-pink-500 to-pink-600">Rosa</option>
-                    <option value="from-indigo-500 to-indigo-600">Índigo</option>
-                  </select>
-                </div>
+                {renderColorSelect('Cor de Fundo (Gradient)', 'customCTAs.doctorTrustCTA.backgroundColor', [
+                  { value: 'from-blue-500 to-blue-600', label: 'Azul' },
+                  { value: 'from-green-400 to-green-500', label: 'Verde' },
+                  { value: 'from-[#BE1D1E] to-[#BE1D1E]', label: 'Vermelho' },
+                  { value: 'from-purple-500 to-purple-600', label: 'Roxo' },
+                  { value: 'from-orange-400 to-orange-500', label: 'Laranja' },
+                  { value: 'from-yellow-400 to-yellow-500', label: 'Amarelo' },
+                  { value: 'from-pink-500 to-pink-600', label: 'Rosa' },
+                  { value: 'from-indigo-500 to-indigo-600', label: 'Índigo' }
+                ])}
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor do Texto</label>
-                  <select
-                    value={content.customCTAs.doctorTrustCTA.textColor}
-                    onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.textColor', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                  >
-                    <option value="text-white">Branco</option>
-                    <option value="text-black">Preto</option>
-                    <option value="text-gray-800">Cinza Escuro</option>
-                  </select>
-                </div>
+                {renderColorSelect('Cor do Texto', 'customCTAs.doctorTrustCTA.textColor', [
+                  { value: 'text-white', label: 'Branco' },
+                  { value: 'text-black', label: 'Preto' },
+                  { value: 'text-gray-800', label: 'Cinza Escuro' },
+                  { value: 'text-[#BE1D1E]', label: 'Vermelho Forte' }
+                ])}
               </div>
               
               <div className="mt-4">
@@ -714,7 +968,7 @@ s.async=!0,document.head.appendChild(s);
                   <span className="text-sm font-medium text-slate-300">Usar Animação Pulse</span>
                   <input
                     type="checkbox"
-                    checked={content.customCTAs.doctorTrustCTA.usePulseAnimation}
+                    checked={tempContent.customCTAs.doctorTrustCTA.usePulseAnimation}
                     onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.usePulseAnimation', e.target.checked)}
                     className="sr-only peer"
                   />
@@ -726,7 +980,7 @@ s.async=!0,document.head.appendChild(s);
                 <label className="block text-sm font-medium text-slate-300 mb-2">URL de Redirecionamento</label>
                 <input
                   type="url"
-                  value={content.customCTAs.doctorTrustCTA.url}
+                  value={tempContent.customCTAs.doctorTrustCTA.url}
                   onChange={(e) => handleInputChange('customCTAs.doctorTrustCTA.url', e.target.value)}
                   placeholder="https://checkout.eagleboost.com/doctor-trust"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
@@ -742,7 +996,7 @@ s.async=!0,document.head.appendChild(s);
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={content.customCTAs.successStoryCTA.enabled}
+                    checked={tempContent.customCTAs.successStoryCTA.enabled}
                     onChange={(e) => handleInputChange('customCTAs.successStoryCTA.enabled', e.target.checked)}
                     className="sr-only peer"
                   />
@@ -754,7 +1008,7 @@ s.async=!0,document.head.appendChild(s);
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Texto do Botão</label>
                   <textarea
-                    value={content.customCTAs.successStoryCTA.text}
+                    value={tempContent.customCTAs.successStoryCTA.text}
                     onChange={(e) => handleInputChange('customCTAs.successStoryCTA.text', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400 resize-vertical min-h-[60px]"
                     rows={2}
@@ -765,43 +1019,30 @@ s.async=!0,document.head.appendChild(s);
                   <label className="block text-sm font-medium text-slate-300 mb-2">Ícone (Emoji)</label>
                   <input
                     type="text"
-                    value={content.customCTAs.successStoryCTA.icon}
+                    value={tempContent.customCTAs.successStoryCTA.icon}
                     onChange={(e) => handleInputChange('customCTAs.successStoryCTA.icon', e.target.value)}
                     placeholder="🚀"
                     className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor de Fundo (Gradient)</label>
-                  <select
-                    value={content.customCTAs.successStoryCTA.backgroundColor}
-                    onChange={(e) => handleInputChange('customCTAs.successStoryCTA.backgroundColor', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                  >
-                    <option value="from-blue-500 to-blue-600">Azul</option>
-                    <option value="from-green-400 to-green-500">Verde</option>
-                    <option value="from-red-500 to-red-600">Vermelho</option>
-                    <option value="from-purple-500 to-purple-600">Roxo</option>
-                    <option value="from-orange-400 to-orange-500">Laranja</option>
-                    <option value="from-yellow-400 to-yellow-500">Amarelo</option>
-                    <option value="from-pink-500 to-pink-600">Rosa</option>
-                    <option value="from-indigo-500 to-indigo-600">Índigo</option>
-                  </select>
-                </div>
+                {renderColorSelect('Cor de Fundo (Gradient)', 'customCTAs.successStoryCTA.backgroundColor', [
+                  { value: 'from-blue-500 to-blue-600', label: 'Azul' },
+                  { value: 'from-green-400 to-green-500', label: 'Verde' },
+                  { value: 'from-[#BE1D1E] to-[#BE1D1E]', label: 'Vermelho' },
+                  { value: 'from-purple-500 to-purple-600', label: 'Roxo' },
+                  { value: 'from-orange-400 to-orange-500', label: 'Laranja' },
+                  { value: 'from-yellow-400 to-yellow-500', label: 'Amarelo' },
+                  { value: 'from-pink-500 to-pink-600', label: 'Rosa' },
+                  { value: 'from-indigo-500 to-indigo-600', label: 'Índigo' }
+                ])}
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor do Texto</label>
-                  <select
-                    value={content.customCTAs.successStoryCTA.textColor}
-                    onChange={(e) => handleInputChange('customCTAs.successStoryCTA.textColor', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
-                  >
-                    <option value="text-white">Branco</option>
-                    <option value="text-black">Preto</option>
-                    <option value="text-gray-800">Cinza Escuro</option>
-                  </select>
-                </div>
+                {renderColorSelect('Cor do Texto', 'customCTAs.successStoryCTA.textColor', [
+                  { value: 'text-white', label: 'Branco' },
+                  { value: 'text-black', label: 'Preto' },
+                  { value: 'text-gray-800', label: 'Cinza Escuro' },
+                  { value: 'text-[#BE1D1E]', label: 'Vermelho Forte' }
+                ])}
               </div>
               
               <div className="mt-4">
@@ -809,7 +1050,7 @@ s.async=!0,document.head.appendChild(s);
                   <span className="text-sm font-medium text-slate-300">Usar Animação Pulse</span>
                   <input
                     type="checkbox"
-                    checked={content.customCTAs.successStoryCTA.usePulseAnimation}
+                    checked={tempContent.customCTAs.successStoryCTA.usePulseAnimation}
                     onChange={(e) => handleInputChange('customCTAs.successStoryCTA.usePulseAnimation', e.target.checked)}
                     className="sr-only peer"
                   />
@@ -821,7 +1062,7 @@ s.async=!0,document.head.appendChild(s);
                 <label className="block text-sm font-medium text-slate-300 mb-2">URL de Redirecionamento</label>
                 <input
                   type="url"
-                  value={content.customCTAs.successStoryCTA.url}
+                  value={tempContent.customCTAs.successStoryCTA.url}
                   onChange={(e) => handleInputChange('customCTAs.successStoryCTA.url', e.target.value)}
                   placeholder="https://checkout.eagleboost.com/success-story"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
@@ -834,31 +1075,158 @@ s.async=!0,document.head.appendChild(s);
             <div className="bg-slate-700 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-white mb-4">Visualização dos Botões</h4>
               <div className="space-y-4">
-                {content.customCTAs.doctorTrustCTA.enabled && (
+                {tempContent.customCTAs.doctorTrustCTA.enabled && (
                   <div className="max-w-sm mx-auto">
-                    <button className={`w-full bg-gradient-to-r ${content.customCTAs.doctorTrustCTA.backgroundColor} ${content.customCTAs.doctorTrustCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300 ${content.customCTAs.doctorTrustCTA.usePulseAnimation ? 'pulse' : ''}`}>
+                    <button className={`w-full bg-gradient-to-r ${tempContent.customCTAs.doctorTrustCTA.backgroundColor} ${tempContent.customCTAs.doctorTrustCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300 ${tempContent.customCTAs.doctorTrustCTA.usePulseAnimation ? 'pulse' : ''}`}>
                       <div className="flex items-center justify-center gap-3">
-                        <span className="text-2xl">{content.customCTAs.doctorTrustCTA.icon}</span>
+                        <span className="text-2xl">{tempContent.customCTAs.doctorTrustCTA.icon}</span>
                         <span className="text-center leading-tight text-sm">
-                          {content.customCTAs.doctorTrustCTA.text}
+                          {tempContent.customCTAs.doctorTrustCTA.text}
                         </span>
                       </div>
                     </button>
                   </div>
                 )}
                 
-                {content.customCTAs.successStoryCTA.enabled && (
+                {tempContent.customCTAs.successStoryCTA.enabled && (
                   <div className="max-w-sm mx-auto">
-                    <button className={`w-full bg-gradient-to-r ${content.customCTAs.successStoryCTA.backgroundColor} ${content.customCTAs.successStoryCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300 ${content.customCTAs.successStoryCTA.usePulseAnimation ? 'pulse' : ''}`}>
+                    <button className={`w-full bg-gradient-to-r ${tempContent.customCTAs.successStoryCTA.backgroundColor} ${tempContent.customCTAs.successStoryCTA.textColor} font-bold text-lg py-5 px-6 rounded-2xl shadow-xl transition-all duration-300 ${tempContent.customCTAs.successStoryCTA.usePulseAnimation ? 'pulse' : ''}`}>
                       <div className="flex items-center justify-center gap-3">
-                        <span className="text-2xl">{content.customCTAs.successStoryCTA.icon}</span>
+                        <span className="text-2xl">{tempContent.customCTAs.successStoryCTA.icon}</span>
                         <span className="text-center leading-tight text-sm">
-                          {content.customCTAs.successStoryCTA.text}
+                          {tempContent.customCTAs.successStoryCTA.text}
                         </span>
                       </div>
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'globalBackground':
+        return (
+          <div>
+            <h3 className="text-xl font-bold text-white mb-6">Configurações de Background Global</h3>
+            
+            <div className="bg-slate-700 rounded-lg p-6">
+              <h4 className="text-lg font-semibold text-white mb-4">Cor de Fundo da Página</h4>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-300 mb-2">Selecionar Background</label>
+                <select
+                  value={tempContent.globalBackground.backgroundClass}
+                  onChange={(e) => handleInputChange('globalBackground.backgroundClass', e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white mb-3"
+                >
+                  {tempContent.globalBackground.availableBackgrounds.map((bg) => (
+                    <option key={bg.name} value={bg.class}>{bg.name}</option>
+                  ))}
+                </select>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Cor Personalizada de Fundo</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={tempContent.globalBackground.backgroundClass}
+                      onChange={(e) => handleInputChange('globalBackground.backgroundClass', e.target.value)}
+                      className="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                    >
+                      <option value="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">Azul Padrão</option>
+                      <option value="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900">Verde Escuro</option>
+                      <option value="bg-gradient-to-br from-purple-900 via-purple-800 to-violet-900">Roxo Escuro</option>
+                      <option value="bg-gradient-to-br from-red-900 via-red-800 to-rose-900">Vermelho Escuro</option>
+                      <option value="bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900">Cinza Escuro</option>
+                      <option value="bg-gradient-to-br from-orange-900 via-orange-800 to-amber-900">Laranja Escuro</option>
+                      <option value="bg-gradient-to-br from-teal-900 via-teal-800 to-cyan-900">Teal Escuro</option>
+                      <option value="bg-black">Preto Sólido</option>
+                      <option value="bg-blue-900">Azul Sólido</option>
+                      <option value="bg-green-900">Verde Sólido</option>
+                      <option value="custom">🎨 Cor Personalizada</option>
+                    </select>
+                    
+                    <button
+                      onClick={() => setColorPickerOpen(colorPickerOpen === 'globalBackground' ? null : 'globalBackground')}
+                      className="px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg hover:bg-slate-500 text-white flex items-center gap-1"
+                      title="Seletor de Cor"
+                    >
+                      <Palette size={16} />
+                    </button>
+                  </div>
+                  
+                  {colorPickerOpen === 'globalBackground' && (
+                    <div className="mt-2 p-3 bg-slate-600 rounded-lg border border-slate-500">
+                      <h6 className="text-sm font-medium text-slate-300 mb-3">Cores Sólidas</h6>
+                      <div className="grid grid-cols-8 gap-2 mb-4">
+                        {[
+                          '#BE1D1E', '#DC2626', '#EF4444', '#F87171',
+                          '#1E40AF', '#2563EB', '#3B82F6', '#60A5FA',
+                          '#059669', '#10B981', '#34D399', '#6EE7B7',
+                          '#7C2D12', '#EA580C', '#F97316', '#FB923C',
+                          '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD',
+                          '#DB2777', '#EC4899', '#F472B6', '#F9A8D4',
+                          '#374151', '#4B5563', '#6B7280', '#9CA3AF',
+                          '#000000', '#1F2937', '#FFFFFF', '#F3F4F6'
+                        ].map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => {
+                              handleInputChange('globalBackground.backgroundClass', `bg-[${color}]`);
+                              setColorPickerOpen(null);
+                            }}
+                            className="w-8 h-8 rounded border-2 border-slate-400 hover:border-white transition-colors"
+                            style={{ backgroundColor: color }}
+                            title={color}
+                          />
+                        ))}
+                      </div>
+                      
+                      <h6 className="text-sm font-medium text-slate-300 mb-3">Gradientes</h6>
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        {[
+                          { name: 'Sunset', class: 'bg-gradient-to-r from-orange-400 to-red-500' },
+                          { name: 'Ocean', class: 'bg-gradient-to-r from-blue-400 to-blue-600' },
+                          { name: 'Forest', class: 'bg-gradient-to-r from-green-400 to-green-600' },
+                          { name: 'Purple', class: 'bg-gradient-to-r from-purple-400 to-purple-600' },
+                          { name: 'Pink', class: 'bg-gradient-to-r from-pink-400 to-pink-600' },
+                          { name: 'Teal', class: 'bg-gradient-to-r from-teal-400 to-teal-600' },
+                          { name: 'Indigo', class: 'bg-gradient-to-r from-indigo-400 to-indigo-600' },
+                          { name: 'Gray', class: 'bg-gradient-to-r from-gray-400 to-gray-600' },
+                          { name: 'Fire', class: 'bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500' },
+                          { name: 'Sky', class: 'bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600' },
+                          { name: 'Emerald', class: 'bg-gradient-to-r from-emerald-400 to-cyan-400' },
+                          { name: 'Rose', class: 'bg-gradient-to-r from-rose-400 to-pink-400' }
+                        ].map((gradient) => (
+                          <button
+                            key={gradient.name}
+                            onClick={() => {
+                              handleInputChange('globalBackground.backgroundClass', gradient.class);
+                              setColorPickerOpen(null);
+                            }}
+                            className={`h-12 rounded border-2 border-slate-400 hover:border-white transition-colors ${gradient.class}`}
+                            title={gradient.name}
+                          />
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => setColorPickerOpen(null)}
+                          className="px-3 py-1 bg-slate-500 text-white rounded text-sm hover:bg-slate-400"
+                        >
+                          Fechar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="bg-slate-600 rounded-lg p-4">
+                <h5 className="text-sm font-medium text-slate-300 mb-2">Preview do Background Selecionado:</h5>
+                <div className={`w-full h-20 rounded-lg ${tempContent.globalBackground.backgroundClass} border border-slate-500`}></div>
+                <p className="text-xs text-slate-400 mt-2">Esta cor será aplicada como fundo de toda a página</p>
               </div>
             </div>
           </div>
@@ -874,7 +1242,7 @@ s.async=!0,document.head.appendChild(s);
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-300 mb-2">Links</label>
-              {content.footer.links.map((link, index) => (
+              {tempContent.footer.links.map((link, index) => (
                 <div key={index} className="flex gap-2 mb-2">
                   <input
                     type="text"
@@ -943,6 +1311,19 @@ s.async=!0,document.head.appendChild(s);
             {saveStatus === 'saving' ? 'Salvando...' : 
              saveStatus === 'saved' ? 'Salvo!' : 
              saveStatus === 'error' ? 'Erro!' : 'Salvar'}
+          </button>
+          
+          <button
+            onClick={handleDiscardChanges}
+            disabled={!hasChanges}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              hasChanges 
+                ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+            }`}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Descartar
           </button>
           
           <button

@@ -34,10 +34,10 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
 
   return (
     <div className={`w-full max-w-sm mx-auto ${className}`}>
-      <div className="flex gap-2">
+      <div className="flex gap-2 min-h-[350px]">
         {/* 3 Bottle Package - Left Card */}
         <div className="flex-1 bg-gradient-to-b from-blue-500 to-blue-600 rounded-2xl shadow-xl overflow-hidden relative">
-          <div className="p-4">
+          <div className="p-4 h-full flex flex-col">
             {/* Product Image */}
             <div 
               className="cursor-pointer transition-transform hover:scale-105 mb-3"
@@ -46,12 +46,12 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
               <img 
                 src={alternativeOffers.offer1.productImage}
                 alt={`EAGLEBOOST ${alternativeOffers.offer1.packageName}`}
-                className="w-full h-45 object-contain"
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.parentElement!.innerHTML = `
-                    <div class="w-full h-45 bg-blue-800 rounded-lg flex items-center justify-center">
+                    <div class="w-full h-full bg-blue-800 rounded-lg flex items-center justify-center">
                       <div class="text-center text-white">
                         <div class="text-xl mb-1">💊💊💊</div>
                         <div class="font-bold text-xs">${alternativeOffers.offer1.packageName}</div>
@@ -63,36 +63,38 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
             </div>
 
             {/* Product Title */}
-            <div className="text-center mb-2">
-              <h3 className="text-white font-black text-lg tracking-wide">EAGLEBOOST</h3>
-              <p className="text-blue-100 text-sm font-bold">{alternativeOffers.offer1.packageName}</p>
+            <div className="text-center mb-1">
+              <h3 className="text-white font-black text-lg tracking-wide">{alternativeOffers.offer1.productName}</h3>
+              <p className="text-blue-100 text-sm font-bold tracking-wide">{alternativeOffers.offer1.packageName}</p>
             </div>
 
             {/* Savings */}
-            <div className="text-center mb-3">
+            <div className="text-center mb-1">
               <div className="text-yellow-300 font-black text-lg">{alternativeOffers.offer1.savings}</div>
             </div>
 
             {/* CTA Button */}
-            <button
-              onClick={() => handleBuyNowClick('3-bottle')}
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-black text-sm py-4 px-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 mb-2"
-            >
-              BUY NOW
-            </button>
+            <div className="mt-auto">
+              <button
+                onClick={() => handleBuyNowClick('3-bottle')}
+                className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-black text-sm py-4 px-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 mb-2"
+              >
+                BUY NOW
+              </button>
 
-            {/* Pricing */}
-            <div className="text-center mb-3">
-              <p className="text-white text-xs">
-                <span className="font-bold">{alternativeOffers.offer1.pricePerBottle} per bottle, {alternativeOffers.offer1.totalPrice} total</span>
-              </p>
+              {/* Pricing */}
+               <div className="text-center mb-1">
+                  <p className="text-white text-xs">
+                    <span className="font-bold">{alternativeOffers.offer1.pricePerBottle} per bottle, {alternativeOffers.offer1.totalPrice} total</span>
+                  </p>
+                </div>
             </div>
 
             {/* Trust Badges */}
             <div className="flex justify-center gap-1">
               <div className="bg-blue-800 rounded-lg px-2 py-1 flex items-center gap-1">
                 <Clock className="w-3 h-3 text-yellow-300" />
-                <span className="text-white text-xs font-bold">90d</span>
+                <span className="text-white text-xs font-bold">{alternativeOffers.offer1.guarantee}</span>
               </div>
               <div className="bg-blue-800 rounded-lg px-2 py-1 flex items-center gap-1">
                 <Truck className="w-3 h-3 text-yellow-300" />
@@ -100,15 +102,15 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
               </div>
               <div className="bg-blue-800 rounded-lg px-2 py-1 flex items-center gap-1">
                 <Shield className="w-3 h-3 text-yellow-300" />
-                <span className="text-white text-xs font-bold">Safe</span>
+                <span className="text-white text-xs font-bold">{alternativeOffers.offer1.security}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 1 Bottle Package - Right Card */}
+        {/* 2 Bottle Package - Right Card */}
         <div className="flex-1 bg-gradient-to-b from-blue-500 to-blue-600 rounded-2xl shadow-xl overflow-hidden relative">
-          <div className="p-4">
+          <div className="p-4 h-full flex flex-col">
             {/* Product Image */}
             <div 
               className="cursor-pointer transition-transform hover:scale-105 mb-3"
@@ -117,12 +119,12 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
               <img 
                 src={alternativeOffers.offer2.productImage}
                 alt={`EAGLEBOOST ${alternativeOffers.offer2.packageName}`}
-                className="w-full h-45 object-contain"
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.parentElement!.innerHTML = `
-                    <div class="w-full h-45 bg-blue-800 rounded-lg flex items-center justify-center">
+                    <div class="w-full h-full bg-blue-800 rounded-lg flex items-center justify-center">
                       <div class="text-center text-white">
                         <div class="text-xl mb-1">💊💊</div>
                         <div class="font-bold text-xs">${alternativeOffers.offer2.packageName}</div>
@@ -134,36 +136,38 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
             </div>
 
             {/* Product Title */}
-            <div className="text-center mb-2">
-              <h3 className="text-white font-black text-lg tracking-wide">EAGLEBOOST</h3>
-              <p className="text-blue-100 text-sm font-bold">{alternativeOffers.offer2.packageName}</p>
+            <div className="text-center mb-1">
+              <h3 className="text-white font-black text-lg tracking-wide">{alternativeOffers.offer2.productName}</h3>
+              <p className="text-blue-100 text-sm font-bold tracking-wide">{alternativeOffers.offer2.packageName}</p>
             </div>
 
             {/* Savings */}
-            <div className="text-center mb-3">
+            <div className="text-center mb-1">
               <div className="text-yellow-300 font-black text-lg">{alternativeOffers.offer2.savings}</div>
             </div>
 
             {/* CTA Button */}
-            <button
-              onClick={() => handleBuyNowClick('2-bottle')}
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-black text-sm py-4 px-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 mb-2"
-            >
-              BUY NOW
-            </button>
+            <div className="mt-auto">
+              <button
+                onClick={() => handleBuyNowClick('2-bottle')}
+                className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-black text-sm py-4 px-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 mb-2"
+              >
+                BUY NOW
+              </button>
 
-            {/* Pricing */}
-            <div className="text-center mb-3">
-              <p className="text-white text-xs">
-                <span className="font-bold">{alternativeOffers.offer2.pricePerBottle} per bottle, {alternativeOffers.offer2.totalPrice} total</span>
-              </p>
+              {/* Pricing */}
+               <div className="text-center mb-1">
+                  <p className="text-white text-xs">
+                    <span className="font-bold">{alternativeOffers.offer2.pricePerBottle} per bottle, {alternativeOffers.offer2.totalPrice} total</span>
+                  </p>
+                </div>
             </div>
 
             {/* Trust Badges */}
             <div className="flex justify-center gap-1">
               <div className="bg-blue-800 rounded-lg px-2 py-1 flex items-center gap-1">
                 <Clock className="w-3 h-3 text-yellow-300" />
-                <span className="text-white text-xs font-bold">90d</span>
+                <span className="text-white text-xs font-bold">{alternativeOffers.offer2.guarantee}</span>
               </div>
               <div className="bg-blue-800 rounded-lg px-2 py-1 flex items-center gap-1">
                 <Truck className="w-3 h-3 text-yellow-300" />
@@ -171,7 +175,7 @@ export const AlternativeOffers: React.FC<AlternativeOffersProps> = ({ className 
               </div>
               <div className="bg-blue-800 rounded-lg px-2 py-1 flex items-center gap-1">
                 <Shield className="w-3 h-3 text-yellow-300" />
-                <span className="text-white text-xs font-bold">Safe</span>
+                <span className="text-white text-xs font-bold">{alternativeOffers.offer2.security}</span>
               </div>
             </div>
           </div>

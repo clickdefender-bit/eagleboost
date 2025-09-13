@@ -16,7 +16,7 @@ import { TopBanner } from './components/TopBanner';
 
 // Importar todos os blocos separados
 import { HeaderBlock } from './components/blocks/HeaderBlock';
-import { MedicalAdvisoryBlock } from './components/blocks/MedicalAdvisoryBlock';
+
 import { DoctorTrustCTABlock } from './components/blocks/DoctorTrustCTABlock';
 import { TransformLifeTitleBlock } from './components/blocks/TransformLifeTitleBlock';
 import { TransformationStartsTodayBlock } from './components/blocks/TransformationStartsTodayBlock';
@@ -26,6 +26,7 @@ import { NoFiltersBlock } from './components/blocks/NoFiltersBlock';
 import { SuccessStoryCTABlock } from './components/blocks/SuccessStoryCTABlock';
 import { useTracking } from './components/TrackingProvider';
 import { useContentSection } from './hooks/useContent';
+import { contentManager } from './utils/contentManager';
 
 // Admin Components
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -41,6 +42,8 @@ import { Settings } from './components/admin/Settings';
 const MainContent: React.FC = () => {
   const { trackClick } = useTracking();
   const video = useContentSection('video');
+  const content = contentManager.getContent();
+  const backgroundClass = content.globalBackground.backgroundClass;
   
   // Force re-render quando conteúdo muda
   const [renderKey, setRenderKey] = React.useState(0);
@@ -70,7 +73,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 p-4">
+    <div className={`min-h-screen ${backgroundClass} p-4`}>
       <div 
         className="flex flex-col items-center justify-center min-h-screen gap-4 sm:gap-6 md:gap-8"
         onClick={handleBackgroundClick}
@@ -84,6 +87,8 @@ const MainContent: React.FC = () => {
           aspectRatio={video.aspectRatio}
           className="w-full max-w-xs sm:max-w-sm md:max-w-md mb-4" 
         />
+        
+
         
         {/* Conteúdo Bloqueado - Aparece apenas após o tempo configurado */}
         <ContentBlocker>
@@ -103,10 +108,7 @@ const MainContent: React.FC = () => {
           {/* Bloco: Carrossel de Médicos */}
           <DoctorCarousel className="w-full mb-8" />
           
-          {/* Bloco: Medical Advisory Board */}
-          <div className="mb-4">
-            <MedicalAdvisoryBlock />
-          </div>
+
           
           {/* Bloco: Doctor Trust CTA */}
           <div className="mb-4">
@@ -155,10 +157,10 @@ const MainContent: React.FC = () => {
           
           {/* Bloco: FAQ */}
           <FAQBlock className="w-full mb-8" />
-          
-          {/* Footer */}
-          <Footer className="w-full" />
         </ContentBlocker>
+        
+        {/* Footer - Sempre visível */}
+        <Footer className="w-full" />
       </div>
     </div>
   );

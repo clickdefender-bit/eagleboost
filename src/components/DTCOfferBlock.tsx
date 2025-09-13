@@ -32,7 +32,7 @@ export const DTCOfferBlock: React.FC<DTCOfferBlockProps> = ({ className = '' }) 
   };
 
   return (
-    <div className={`w-full max-w-sm mx-auto relative ${className}`}>
+    <div id="main-offer" className={`w-full max-w-sm mx-auto relative ${className}`}>
       {/* Best Value Badge - Positioned on the border */}
       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
         <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-bold px-6 py-2 rounded-full text-sm shadow-lg">

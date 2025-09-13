@@ -97,6 +97,16 @@ const ContentBlocker: React.FC<ContentBlockerProps> = ({ children, contentId = '
         if (timeLeft <= 0) {
           setIsUnlocked(true);
           clearInterval(interval);
+          // Scroll to main offer when content is unlocked
+          setTimeout(() => {
+            const mainOfferElement = document.getElementById('main-offer');
+            if (mainOfferElement) {
+              mainOfferElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+            }
+          }, 500); // Small delay to ensure content is rendered
         } else {
           setRemainingTime(timeLeft);
         }
@@ -105,6 +115,16 @@ const ContentBlocker: React.FC<ContentBlockerProps> = ({ children, contentId = '
       setTimeout(() => {
         setIsUnlocked(true);
         clearInterval(interval);
+        // Scroll to main offer when content is unlocked
+        setTimeout(() => {
+          const mainOfferElement = document.getElementById('main-offer');
+          if (mainOfferElement) {
+            mainOfferElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 500); // Small delay to ensure content is rendered
       }, unlockTimeMinutes * 60 * 1000);
     } else {
       // No timer set, unlock immediately

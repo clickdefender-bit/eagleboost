@@ -107,7 +107,7 @@ export const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({ clas
             className="absolute inset-0 transition-all duration-700 ease-in-out"
             style={getCardStyle(index)}
           >
-            <div className="bg-white rounded-2xl shadow-xl p-5 h-full flex flex-col mx-2">
+            <div className="bg-white rounded-2xl shadow-xl p-6 h-full flex flex-col mx-2">
               {/* Customer Header */}
               <div className="flex items-center gap-3 mb-3">
                 <div className="relative">

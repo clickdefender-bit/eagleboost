@@ -5,6 +5,9 @@ export interface SiteContent {
     title: string;
     subtitle: string;
     buttonText: string;
+    titleColor: string;
+    subtitleColor: string;
+    buttonColor: string;
   };
   
   // Video Container
@@ -59,20 +62,26 @@ export interface SiteContent {
   alternativeOffers: {
     offer1: {
       productImage: string;
+      productName: string;
       packageName: string;
       savings: string;
       pricePerBottle: string;
       totalPrice: string;
       shipping: string;
+      guarantee: string;
+      security: string;
       buttonUrl: string;
     };
     offer2: {
       productImage: string;
+      productName: string;
       packageName: string;
       savings: string;
       pricePerBottle: string;
       totalPrice: string;
       shipping: string;
+      guarantee: string;
+      security: string;
       buttonUrl: string;
     };
   };
@@ -152,6 +161,79 @@ export interface SiteContent {
     disclaimer: string;
     links: string[];
   };
+  
+  // Title Blocks
+  titleBlocks: {
+    noFilters: {
+      title: string;
+      subtitle: string;
+      titleColor: string;
+      subtitleColor: string;
+    };
+    newsOutlets: {
+      title: string;
+      subtitle: string;
+      dragInstruction: string;
+      titleColor: string;
+      subtitleColor: string;
+    };
+    transformLife: {
+      title: string;
+      subtitle1: string;
+      subtitle2: string;
+      titleColor: string;
+      subtitle1Color: string;
+      subtitle2Color: string;
+    };
+  };
+
+  // Global Title Styling
+  globalTitleStyling: {
+    availableColors: Array<{
+      name: string;
+      value: string;
+      type: 'solid' | 'gradient';
+    }>;
+  };
+  
+  // Global Background Settings
+  globalBackground: {
+    backgroundClass: string;
+    availableBackgrounds: Array<{
+      name: string;
+      class: string;
+    }>;
+  };
+  
+  // Custom CTAs
+  customCTAs: {
+    globalSettings: {
+      defaultBackgroundColor: string;
+      defaultTextColor: string;
+      availableColors: Array<{
+        name: string;
+        background: string;
+      }>;
+    };
+    doctorTrustCTA: {
+      enabled: boolean;
+      text: string;
+      icon: string;
+      backgroundColor: string;
+      textColor: string;
+      usePulseAnimation: boolean;
+      url: string;
+    };
+    successStoryCTA: {
+      enabled: boolean;
+      text: string;
+      icon: string;
+      backgroundColor: string;
+      textColor: string;
+      usePulseAnimation: boolean;
+      url: string;
+    };
+  };
 }
 
 // Conteúdo padrão
@@ -159,7 +241,10 @@ const defaultContent: SiteContent = {
   topBanner: {
     title: "Baking Soda cures Impotence",
     subtitle: "This secret recipe can reverse Impotence in just 7 Days",
-    buttonText: "WATCH BELOW AND SEE HOW IT WORKS"
+    buttonText: "WATCH BELOW AND SEE HOW IT WORKS",
+    titleColor: "text-blue-300",
+    subtitleColor: "text-blue-200",
+    buttonColor: "text-blue-300"
   },
   
   video: {
@@ -204,20 +289,26 @@ const defaultContent: SiteContent = {
   alternativeOffers: {
     offer1: {
       productImage: "https://imgur.com/zDHfVkS.png",
+      productName: "EAGLEBOOST",
       packageName: "3 BOTTLE PACKAGE",
       savings: "SAVE $398",
       pricePerBottle: "$66",
       totalPrice: "$198",
       shipping: "Free",
+      guarantee: "90d",
+      security: "Safe",
       buttonUrl: ""
     },
     offer2: {
       productImage: "https://imgur.com/VZX2Kel.png",
+      productName: "EAGLEBOOST",
       packageName: "2 BOTTLE PACKAGE",
       savings: "SAVE $200",
       pricePerBottle: "$69",
       totalPrice: "$138",
       shipping: "$9.99",
+      guarantee: "90d",
+      security: "Safe",
       buttonUrl: ""
     }
   },
@@ -234,7 +325,7 @@ const defaultContent: SiteContent = {
         institution: "Columbia University",
         photo: "https://imgur.com/Jsdpslh.png",
         recommendation: "EAGLEBOOST represents a breakthrough in natural men's health. Simple ingredients, impressive results.",
-        videoEmbed: "<vturb-smartplayer id='vid-doctor-1' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
+        videoEmbed: "<script type='text/javascript'> var s=document.createElement('script'); s.src='https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js', s.async=!0,document.head.appendChild(s); </script> <div id='ifr_68c1baf2d111494b6113b2dc_wrapper' style='margin: 0 auto; width: 100%; max-width: 400px;'> <div style='position: relative; padding: 177.77777777777777% 0 0 0;' id='ifr_68c1baf2d111494b6113b2dc_aspect'> <iframe frameborder='0' allowfullscreen src='about:blank' id='ifr_68c1baf2d111494b6113b2dc' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;' referrerpolicy='origin' onload='this.onload=null, this.src=\"https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/embed.html\" +(location.search||\"?\") +\"&vl=\" +encodeURIComponent(location.href)'></iframe> </div> </div>"
       },
       {
         id: 2,
@@ -243,7 +334,7 @@ const defaultContent: SiteContent = {
         institution: "University of Maryland",
         photo: "https://imgur.com/PgyFyIB.png",
         recommendation: "EAGLEBOOST offers men a proven alternative that supports both physical and mental wellness.",
-        videoEmbed: "<vturb-smartplayer id='vid-doctor-2' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
+        videoEmbed: "<script type='text/javascript'> var s=document.createElement('script'); s.src='https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js', s.async=!0,document.head.appendChild(s); </script> <div id='ifr_68c2dc54023399f4a5c43932_wrapper' style='margin: 0 auto; width: 100%; max-width: 400px;'> <div style='position: relative; padding: 177.77777777777777% 0 0 0;' id='ifr_68c2dc54023399f4a5c43932_aspect'> <iframe frameborder='0' allowfullscreen src='about:blank' id='ifr_68c2dc54023399f4a5c43932' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;' referrerpolicy='origin' onload='this.onload=null, this.src=\"https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c2dc54023399f4a5c43932/v4/embed.html\" +(location.search||\"?\") +\"&vl=\" +encodeURIComponent(location.href)'></iframe> </div> </div>"
       },
       {
         id: 3,
@@ -252,7 +343,7 @@ const defaultContent: SiteContent = {
         institution: "Integrative Medicine",
         photo: "https://imgur.com/jsyoqH5.png",
         recommendation: "The ingredients I chose in EAGLEBOOST restore vitality exactly my philosophy.",
-        videoEmbed: "<vturb-smartplayer id='vid-doctor-3' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
+        videoEmbed: "<script type='text/javascript'> var s=document.createElement('script'); s.src='https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js', s.async=!0,document.head.appendChild(s); </script> <div id='ifr_68c2dc54023399f4a5c43933_wrapper' style='margin: 0 auto; width: 100%; max-width: 400px;'> <div style='position: relative; padding: 177.77777777777777% 0 0 0;' id='ifr_68c2dc54023399f4a5c43933_aspect'> <iframe frameborder='0' allowfullscreen src='about:blank' id='ifr_68c2dc54023399f4a5c43933' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;' referrerpolicy='origin' onload='this.onload=null, this.src=\"https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c2dc54023399f4a5c43933/v4/embed.html\" +(location.search||\"?\") +\"&vl=\" +encodeURIComponent(location.href)'></iframe> </div> </div>"
       }
     ]
   },
@@ -268,7 +359,7 @@ const defaultContent: SiteContent = {
         photo: "https://imgur.com/uEGrHTs.png",
         testimonial: "My wife noticed the difference before I even told her about EagleBoost!",
         rating: 5,
-        videoEmbed: "<vturb-smartplayer id='vid-testimonial-1' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
+        videoEmbed: "<vturb-smartplayer id='vid-68c2dc54023399f4a5c43934' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c2dc54023399f4a5c43934/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       },
       {
         id: 2,
@@ -277,7 +368,7 @@ const defaultContent: SiteContent = {
         photo: "https://imgur.com/fyYHrSK.png",
         testimonial: "After 50, I thought there was no hope. EagleBoost proved me wrong!",
         rating: 5,
-        videoEmbed: "<vturb-smartplayer id='vid-testimonial-2' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
+        videoEmbed: "<vturb-smartplayer id='vid-68c2dc54023399f4a5c43935' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c2dc54023399f4a5c43935/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       },
       {
         id: 3,
@@ -286,7 +377,7 @@ const defaultContent: SiteContent = {
         photo: "https://imgur.com/m9I7AHX.png",
         testimonial: "EagleBoost completely changed my life. I felt the difference in just 2 weeks!",
         rating: 5,
-        videoEmbed: "<vturb-smartplayer id='vid-testimonial-3' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c1baf2d111494b6113b2dc/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
+        videoEmbed: "<vturb-smartplayer id='vid-68c2dc54023399f4a5c43936' style='display: block; margin: 0 auto; width: 100%; height: 100%;'></vturb-smartplayer><script type='text/javascript'>var s=document.createElement('script');s.src='https://scripts.converteai.net/d37be28a-dfe1-4a86-98a2-9c82944967ec/players/68c2dc54023399f4a5c43936/v4/player.js',s.async=!0,document.head.appendChild(s);</script>"
       }
     ]
   },
@@ -368,6 +459,105 @@ const defaultContent: SiteContent = {
     copyright: "Copyright ©2025 | EAGLEBOOST",
     disclaimer: "These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease.",
     links: ["Privacy Policy", "Terms of Service", "Contact Us"]
+  },
+  
+  titleBlocks: {
+    noFilters: {
+      title: "No Filters. Just Real Results.",
+      subtitle: "What Real Men Are Saying About EAGLEBOOST",
+      titleColor: "bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent",
+      subtitleColor: "text-slate-300"
+    },
+    newsOutlets: {
+      title: "As Seen In Major News Outlets",
+      subtitle: "Leading Health Publications Cover EAGLEBOOST",
+      dragInstruction: "Drag to navigate between news articles",
+      titleColor: "bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent",
+      subtitleColor: "text-slate-300"
+    },
+    transformLife: {
+      title: "Ready to Transform Your Life?",
+      subtitle1: "Choose your EAGLEBOOST package below",
+      subtitle2: "Don't miss this opportunity to transform your health and confidence",
+      titleColor: "bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent",
+      subtitle1Color: "text-slate-300",
+      subtitle2Color: "text-slate-400"
+    }
+  },
+
+  globalTitleStyling: {
+    availableColors: [
+      { name: "Azul Sólido", value: "text-blue-400", type: "solid" },
+      { name: "Verde Sólido", value: "text-green-400", type: "solid" },
+      { name: "Roxo Sólido", value: "text-purple-400", type: "solid" },
+      { name: "Laranja Sólido", value: "text-orange-400", type: "solid" },
+      { name: "Vermelho Sólido", value: "text-[#BE1D1E]", type: "solid" },
+      { name: "Vermelho Forte", value: "text-[#BE1D1E]", type: "solid" },
+      { name: "Rosa Sólido", value: "text-pink-400", type: "solid" },
+      { name: "Amarelo Sólido", value: "text-yellow-400", type: "solid" },
+      { name: "Branco", value: "text-white", type: "solid" },
+      { name: "Cinza Claro", value: "text-slate-300", type: "solid" },
+      { name: "Azul → Roxo", value: "bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent", type: "gradient" },
+      { name: "Verde → Azul", value: "bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent", type: "gradient" },
+      { name: "Laranja → Vermelho", value: "bg-gradient-to-r from-orange-400 to-[#BE1D1E] bg-clip-text text-transparent", type: "gradient" },
+      { name: "Rosa → Roxo", value: "bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent", type: "gradient" },
+      { name: "Amarelo → Laranja", value: "bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent", type: "gradient" },
+      { name: "Ciano → Azul", value: "bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent", type: "gradient" },
+      { name: "Roxo → Rosa", value: "bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent", type: "gradient" },
+      { name: "Verde → Amarelo", value: "bg-gradient-to-r from-green-400 to-yellow-500 bg-clip-text text-transparent", type: "gradient" }
+    ]
+  },
+  
+  globalBackground: {
+      backgroundClass: 'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900',
+      availableBackgrounds: [
+      { name: "Azul Padrão", class: "bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900" },
+      { name: "Verde Escuro", class: "bg-gradient-to-br from-green-900 via-green-800 to-emerald-900" },
+      { name: "Roxo Escuro", class: "bg-gradient-to-br from-purple-900 via-purple-800 to-violet-900" },
+      { name: "Vermelho Escuro", class: "bg-gradient-to-br from-red-900 via-red-800 to-rose-900" },
+      { name: "Cinza Escuro", class: "bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900" },
+      { name: "Laranja Escuro", class: "bg-gradient-to-br from-orange-900 via-orange-800 to-amber-900" },
+      { name: "Teal Escuro", class: "bg-gradient-to-br from-teal-900 via-teal-800 to-cyan-900" },
+      { name: "Preto Sólido", class: "bg-black" },
+      { name: "Azul Sólido", class: "bg-blue-900" },
+      { name: "Verde Sólido", class: "bg-green-900" }
+    ]
+  },
+  
+  customCTAs: {
+    globalSettings: {
+      defaultBackgroundColor: "from-blue-600 to-purple-600",
+      defaultTextColor: "text-white",
+      availableColors: [
+        { name: "Azul para Roxo", background: "from-blue-600 to-purple-600" },
+        { name: "Verde para Azul", background: "from-green-500 to-blue-600" },
+        { name: "Laranja para Vermelho", background: "from-orange-500 to-[#BE1D1E]" },
+        { name: "Rosa para Roxo", background: "from-pink-500 to-purple-600" },
+        { name: "Amarelo para Laranja", background: "from-yellow-500 to-orange-500" },
+        { name: "Vermelho para Rosa", background: "from-[#BE1D1E] to-pink-500" },
+        { name: "Vermelho Forte", background: "from-[#BE1D1E] to-[#BE1D1E]" },
+        { name: "Índigo para Azul", background: "from-indigo-600 to-blue-500" },
+        { name: "Teal para Verde", background: "from-teal-500 to-green-500" }
+      ]
+    },
+    doctorTrustCTA: {
+      enabled: true,
+      text: "Start Your Doctor-Approved Treatment — Tap Now!",
+      icon: "👨‍⚕️",
+      backgroundColor: "from-blue-600 to-purple-600",
+      textColor: "text-white",
+      usePulseAnimation: true,
+      url: ""
+    },
+    successStoryCTA: {
+      enabled: true,
+      text: "Ready to Be Our Next Success Story?",
+      icon: "🚀",
+      backgroundColor: "from-green-500 to-blue-600",
+      textColor: "text-white",
+      usePulseAnimation: true,
+      url: ""
+    }
   }
 };
 
@@ -421,6 +611,10 @@ class ContentManager {
         ...defaultContent.faq,
         ...stored.faq,
         items: stored.faq?.items || defaultContent.faq.items
+      },
+      titleBlocks: {
+        ...defaultContent.titleBlocks,
+        ...stored.titleBlocks
       }
     };
   }

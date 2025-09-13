@@ -122,10 +122,10 @@ export const Logs: React.FC = () => {
 
   const getLogColor = (type: string) => {
     switch (type) {
-      case 'page_view': return 'bg-blue-50 border-blue-200';
-      case 'click': return 'bg-green-50 border-green-200';
-      case 'visitor': return 'bg-purple-50 border-purple-200';
-      default: return 'bg-gray-50 border-gray-200';
+      case 'page_view': return 'bg-blue-900/20 border-blue-700';
+      case 'click': return 'bg-green-900/20 border-green-700';
+      case 'visitor': return 'bg-purple-900/20 border-purple-700';
+      default: return 'bg-slate-800 border-slate-600';
     }
   };
 

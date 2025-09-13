@@ -23,17 +23,17 @@ export const TopBanner: React.FC<TopBannerProps> = ({ className = '' }) => {
 
   return (
     <div className={`w-full max-w-sm mx-auto text-center ${className}`}>
-      <h1 className="text-4xl font-black mb-6 leading-tight text-blue-300">
+      <h1 className={`text-4xl font-black mb-6 leading-tight ${topBanner.titleColor}`}>
         {topBanner.title}
       </h1>
       
-      <p className="text-blue-200 text-lg font-medium mb-4">
+      <p className={`text-lg font-medium mb-4 ${topBanner.subtitleColor}`}>
         {topBanner.subtitle}
       </p>
       
       <button
         onClick={handleWatchBelowClick}
-        className="text-blue-300 font-bold text-sm hover:text-blue-100 transition-colors duration-300 flex items-center justify-center gap-2 mx-auto"
+        className={`${topBanner.buttonColor} font-bold text-sm hover:opacity-80 transition-all duration-300 flex items-center justify-center gap-2 mx-auto`}
       >
         <Play className="w-4 h-4" fill="currentColor" />
         <span className="uppercase tracking-wide">

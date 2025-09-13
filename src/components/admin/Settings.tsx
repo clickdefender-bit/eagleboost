@@ -1,21 +1,145 @@
-import React, { useState } from 'react';
-import { Save, Key, Globe, Bell, Shield } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Save, Key, Globe, Bell, Shield, FileText, Image, Upload, CheckCircle, AlertCircle, RotateCw } from 'lucide-react';
+import { MetadataService, PageMetadata } from '../../services/metadataService';
+import { useAdminConfig, adminConfigManager } from '../../utils/adminConfigManager';
+import { adminSyncService } from '../../utils/adminSyncService';
 
 export const Settings: React.FC = () => {
-  const [settings, setSettings] = useState({
-    siteName: 'EAGLEBOOST',
-    siteUrl: 'https://eagleboost.com',
-    trackingEnabled: true,
-    emailNotifications: true,
-    slackWebhook: '',
-    apiKey: 'eb_live_1234567890abcdef',
-    dataRetention: '90',
-    timezone: 'America/New_York'
-  });
+  const { config, updateConfig, resetConfig, exportConfig, importConfig, getStats } = useAdminConfig();
+  const [isUploading, setIsUploading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [syncStatus, setSyncStatus] = useState(adminSyncService.getStatus());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = () => {
-    // Save settings logic
-    console.log('Settings saved:', settings);
+  useEffect(() => {
+    // Atualiza status de sincronização periodicamente
+    const interval = setInterval(() => {
+      setSyncStatus(adminSyncService.getStatus());
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSave = async () => {
+    setSaveStatus('saving');
+    
+    try {
+      // Salva metadata usando o serviço existente
+      const metadata: PageMetadata = {
+        pageTitle: config.pageTitle,
+        pageDescription: config.pageDescription,
+        faviconUrl: config.faviconUrl
+      };
+      
+      MetadataService.saveMetadata(metadata);
+      
+      // As configurações já são salvas automaticamente pelo adminConfigManager
+      // Força uma sincronização para garantir que tudo está atualizado
+      adminSyncService.forcSync();
+      
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      
+      console.log('✅ Configurações salvas e sincronizadas com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao salvar configurações:', error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+  };
+
+  const handleFaviconUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const faviconUrl = await MetadataService.uploadFavicon(file);
+      updateConfig({ faviconUrl });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao fazer upload do favicon');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
+  const handleConfigImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const success = importConfig(content);
+        
+        if (success) {
+          alert('Configurações importadas com sucesso!');
+        } else {
+          alert('Erro ao importar configurações. Verifique o formato do arquivo.');
+        }
+      } catch (error) {
+        alert('Erro ao ler o arquivo de configurações.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  
+  const handleConfigExport = () => {
+    const configJson = exportConfig();
+    const blob = new Blob([configJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eagleboost-config-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    URL.revokeObjectURL(url);
+  };
+  
+  const handleResetConfig = () => {
+    if (confirm('Tem certeza que deseja resetar todas as configurações para os valores padrão? Esta ação não pode ser desfeita.')) {
+      resetConfig();
+      alert('Configurações resetadas com sucesso!');
+    }
+  };
+  
+  const handleForceSync = () => {
+    adminSyncService.forcSync();
+    setSyncStatus(adminSyncService.getStatus());
+    alert('Sincronização forçada executada!');
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const triggerConfigImport = () => {
+    importInputRef.current?.click();
+  };
+  
+  const stats = getStats();
+  
+  const getSaveStatusIcon = () => {
+    switch (saveStatus) {
+      case 'saving': return <RotateCw className="w-4 h-4 animate-spin text-blue-400" />;
+      case 'saved': return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case 'error': return <AlertCircle className="w-4 h-4 text-red-400" />;
+      default: return <Save className="w-4 h-4" />;
+    }
+  };
+  
+  const getSaveStatusText = () => {
+    switch (saveStatus) {
+      case 'saving': return 'Salvando...';
+      case 'saved': return 'Salvo!';
+      case 'error': return 'Erro ao salvar';
+      default: return 'Salvar Configurações';
+    }
   };
 
   return (
@@ -40,8 +164,8 @@ export const Settings: React.FC = () => {
             </label>
             <input
               type="text"
-              value={settings.siteName}
-              onChange={(e) => setSettings({...settings, siteName: e.target.value})}
+              value={config.siteName}
+              onChange={(e) => updateConfig({ siteName: e.target.value })}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
             />
           </div>
@@ -52,8 +176,8 @@ export const Settings: React.FC = () => {
             </label>
             <input
               type="url"
-              value={settings.siteUrl}
-              onChange={(e) => setSettings({...settings, siteUrl: e.target.value})}
+              value={config.siteUrl}
+              onChange={(e) => updateConfig({ siteUrl: e.target.value })}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
             />
           </div>
@@ -63,8 +187,8 @@ export const Settings: React.FC = () => {
               Fuso Horário
             </label>
             <select
-              value={settings.timezone}
-              onChange={(e) => setSettings({...settings, timezone: e.target.value})}
+              value={config.timezone}
+              onChange={(e) => updateConfig({ timezone: e.target.value })}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
             >
               <option value="America/New_York">Eastern Time</option>
@@ -92,7 +216,7 @@ export const Settings: React.FC = () => {
             <div className="flex gap-2">
               <input
                 type="password"
-                value={settings.apiKey}
+                value={config.apiKey}
                 readOnly
                 className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-400"
               />
@@ -123,8 +247,8 @@ export const Settings: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.trackingEnabled}
-                onChange={(e) => setSettings({...settings, trackingEnabled: e.target.checked})}
+                checked={config.trackingEnabled}
+                onChange={(e) => updateConfig({ trackingEnabled: e.target.checked })}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -136,8 +260,8 @@ export const Settings: React.FC = () => {
               Data Retention (days)
             </label>
             <select
-              value={settings.dataRetention}
-              onChange={(e) => setSettings({...settings, dataRetention: e.target.value})}
+              value={config.dataRetention}
+              onChange={(e) => updateConfig({ dataRetention: e.target.value })}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
             >
               <option value="30">30 days</option>
@@ -145,6 +269,85 @@ export const Settings: React.FC = () => {
               <option value="180">180 days</option>
               <option value="365">1 year</option>
             </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Page Metadata Settings */}
+      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="flex items-center gap-3 mb-6">
+          <FileText className="w-6 h-6 text-orange-600" />
+          <h3 className="text-lg font-semibold text-white">Metadados da Página</h3>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Título da Página
+            </label>
+            <input
+              type="text"
+              value={config.pageTitle}
+              onChange={(e) => updateConfig({ pageTitle: e.target.value })}
+              placeholder="Digite o título que aparecerá na aba do navegador"
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Este título aparecerá na aba do navegador e nos resultados de busca
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Descrição da Página
+            </label>
+            <textarea
+              value={config.pageDescription}
+              onChange={(e) => updateConfig({ pageDescription: e.target.value })}
+              placeholder="Descrição que aparecerá nos mecanismos de busca"
+              rows={3}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400 resize-none"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Meta descrição para SEO (recomendado: 150-160 caracteres)
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Favicon URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={config.faviconUrl}
+                onChange={(e) => updateConfig({ faviconUrl: e.target.value })}
+                placeholder="/favicon.ico ou URL completa"
+                className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
+              />
+              <input
+                 ref={fileInputRef}
+                 type="file"
+                 accept=".ico,.png,.svg,.jpg,.jpeg,.gif"
+                 onChange={handleFaviconUpload}
+                 className="hidden"
+               />
+               <button 
+                 onClick={triggerFileUpload}
+                 disabled={isUploading}
+                 className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-orange-400 flex items-center gap-2"
+               >
+                 {isUploading ? (
+                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                 ) : (
+                   <Upload className="w-4 h-4" />
+                 )}
+                 {isUploading ? 'Enviando...' : 'Upload'}
+               </button>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Ícone que aparece na aba do navegador (formato .ico, .png ou .svg)
+            </p>
           </div>
         </div>
       </div>
@@ -165,8 +368,8 @@ export const Settings: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.emailNotifications}
-                onChange={(e) => setSettings({...settings, emailNotifications: e.target.checked})}
+                checked={config.emailNotifications}
+                onChange={(e) => updateConfig({ emailNotifications: e.target.checked })}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -179,8 +382,8 @@ export const Settings: React.FC = () => {
             </label>
             <input
               type="url"
-              value={settings.slackWebhook}
-              onChange={(e) => setSettings({...settings, slackWebhook: e.target.value})}
+              value={config.slackWebhook}
+              onChange={(e) => updateConfig({ slackWebhook: e.target.value })}
               placeholder="https://hooks.slack.com/services/..."
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400"
             />
@@ -191,16 +394,105 @@ export const Settings: React.FC = () => {
         </div>
       </div>
 
+      {/* Seção de Gerenciamento de Configurações */}
+      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="flex items-center gap-3 mb-6">
+          <Shield className="w-6 h-6 text-purple-600" />
+          <h3 className="text-lg font-semibold text-white">Gerenciamento de Configurações</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {/* Status de Sincronização */}
+          <div className="bg-slate-700 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-slate-300 mb-2">Status de Sincronização</h4>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                syncStatus.isActive ? 'bg-green-400' : 'bg-red-400'
+              }`}></div>
+              <span className="text-sm text-white">
+                {syncStatus.isActive ? 'Ativo' : 'Inativo'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+               Última sincronização: {new Date(syncStatus.lastSyncTime).toLocaleString('pt-BR')}
+             </p>
+            <button
+              onClick={handleForceSync}
+              className="mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Forçar Sincronização
+            </button>
+          </div>
+          
+          {/* Estatísticas */}
+          <div className="bg-slate-700 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-slate-300 mb-2">Estatísticas</h4>
+            <div className="space-y-1 text-xs text-slate-400">
+               <div>Listeners ativos: {stats.listenersCount}</div>
+               <div>Última atualização: {new Date(stats.lastUpdated).toLocaleString('pt-BR')}</div>
+               <div>Versão: {stats.configVersion}</div>
+               <div>Auto-sync: {stats.autoSyncEnabled ? 'Ativo' : 'Inativo'}</div>
+               <div>Backup: {stats.backupEnabled ? 'Ativo' : 'Inativo'}</div>
+             </div>
+          </div>
+        </div>
+        
+        {/* Botões de Ação */}
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={handleConfigExport}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
+          >
+            <FileText className="w-4 h-4" />
+            Exportar Configurações
+          </button>
+          
+          <button
+            onClick={triggerConfigImport}
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            Importar Configurações
+          </button>
+          
+          <button
+            onClick={handleResetConfig}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+          >
+            <AlertCircle className="w-4 h-4" />
+            Resetar Configurações
+          </button>
+        </div>
+      </div>
+
       {/* Save Button */}
       <div className="flex justify-end">
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={saveStatus === 'saving'}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors ${
+            saveStatus === 'saving' 
+              ? 'bg-blue-500 cursor-not-allowed' 
+              : saveStatus === 'saved'
+              ? 'bg-green-600 hover:bg-green-700'
+              : saveStatus === 'error'
+              ? 'bg-red-600 hover:bg-red-700'
+              : 'bg-blue-600 hover:bg-blue-700'
+          } text-white`}
         >
-          <Save className="w-5 h-5" />
-          Salvar Configurações
+          {getSaveStatusIcon()}
+          {getSaveStatusText()}
         </button>
       </div>
+
+      {/* Hidden file inputs */}
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleConfigImport}
+        className="hidden"
+      />
     </div>
   );
 };

@@ -19,30 +19,61 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptLoadedRef = useRef<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!embedCode || !containerRef.current) return;
+    if (!embedCode || !containerRef.current) {
+      setIsLoading(false);
+      return;
+    }
 
     const container = containerRef.current;
+    setIsLoading(true);
+    setHasError(false);
+    
+    // Função de cleanup
+    const cleanup = () => {
+      // Remove todos os iframes e elementos VTURB existentes
+      const existingIframes = container.querySelectorAll('iframe');
+      existingIframes.forEach(iframe => iframe.remove());
+      
+      const existingVturbElements = container.querySelectorAll('[id*="vturb"], [id*="ifr_"]');
+      existingVturbElements.forEach(element => element.remove());
+      
+      // Limpa completamente o container
+      container.innerHTML = '';
+    };
     
     try {
-      // Limpa o container
-      container.innerHTML = '';
+      // Executa cleanup antes de carregar novo conteúdo
+      cleanup();
       
-      // Insere o embed code diretamente
-      container.innerHTML = embedCode;
+      // Adiciona um timestamp único para evitar conflitos de cache
+      const timestamp = Date.now();
+      const modifiedEmbedCode = embedCode.replace(/id='([^']+)'/g, `id='$1_${timestamp}'`);
       
-      // Processa scripts do container
-      const scripts = container.querySelectorAll('script');
+      // Cria um wrapper temporário para processar o HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = modifiedEmbedCode;
+      
+      // Move todos os elementos do wrapper temporário para o container
+      while (tempDiv.firstChild) {
+        container.appendChild(tempDiv.firstChild);
+      }
+      
+      // Processa scripts do container e do documento
+      const containerScripts = container.querySelectorAll('script');
       let scriptIndex = 0;
       
       const loadNextScript = () => {
-        if (scriptIndex >= scripts.length) {
+        if (scriptIndex >= containerScripts.length) {
+          setIsLoading(false);
           onLoad?.();
           return;
         }
         
-        const script = scripts[scriptIndex];
+        const script = containerScripts[scriptIndex];
         const scriptSrc = script.src;
         const scriptContent = script.textContent || script.innerHTML;
         
@@ -53,18 +84,19 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
           if (!scriptLoadedRef.current.has(scriptSrc)) {
             const newScript = document.createElement('script');
             newScript.src = scriptSrc;
-            newScript.async = false; // Carregamento sequencial
+            newScript.async = true;
             
             newScript.onload = () => {
               scriptLoadedRef.current.add(scriptSrc);
-              // Aguarda um pouco antes de carregar o próximo
               setTimeout(loadNextScript, 100);
             };
             
             newScript.onerror = () => {
               const error = new Error(`Falha ao carregar script VTURB: ${scriptSrc}`);
+              setHasError(true);
+              setIsLoading(false);
               onError?.(error);
-              loadNextScript(); // Continua mesmo com erro
+              loadNextScript();
             };
             
             document.head.appendChild(newScript);
@@ -74,12 +106,12 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
         } else if (scriptContent) {
           // Script inline - executa diretamente
           try {
-            const newScript = document.createElement('script');
-            newScript.textContent = scriptContent;
-            document.body.appendChild(newScript);
-            document.body.removeChild(newScript);
+            // Executa o script inline de forma segura
+            const func = new Function(scriptContent);
+            func();
           } catch (e) {
             console.error('Erro ao executar script inline:', e);
+            setHasError(true);
           }
           setTimeout(loadNextScript, 50);
         } else {
@@ -92,35 +124,50 @@ export const VTURBPlayer: React.FC<VTURBPlayerProps> = ({
       
     } catch (error) {
       console.error('Erro ao processar embed VTURB:', error);
+      setHasError(true);
+      setIsLoading(false);
       onError?.(error as Error);
     }
+    
+    // Retorna função de cleanup para quando o componente for desmontado
+    return cleanup;
   }, [embedCode, onLoad, onError]);
 
   if (!embedCode) {
     return (
-      <div 
-        className={`flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 ${className}`}
-        style={style}
-      >
-        <div className="text-center text-white p-6">
-          <div className="text-6xl mb-4">🎥</div>
-          <h3 className="text-xl font-bold mb-2">Vídeo VTURB</h3>
-          <p className="text-sm opacity-80">Configure o embed no admin</p>
-        </div>
+      <div className={`w-full bg-gray-100 flex items-center justify-center ${className}`} style={style}>
+        <p className="text-gray-500">Nenhum vídeo disponível</p>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className={`w-full bg-gray-100 flex items-center justify-center ${className}`} style={{
+        aspectRatio: aspectRatio || '16/9',
+        ...style
+      }}>
+        <p className="text-gray-500">Erro ao carregar vídeo</p>
       </div>
     );
   }
 
   return (
-    <div className={`w-full h-full ${className}`} style={style}>
+    <div className="relative w-full" style={{
+      aspectRatio: aspectRatio || '16/9',
+      ...style
+    }}>
+      {isLoading && (
+        <div className={`absolute inset-0 bg-gray-100 flex items-center justify-center z-10 ${className}`}>
+          <div className="flex flex-col items-center space-y-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="text-gray-500 text-sm">Carregando vídeo...</p>
+          </div>
+        </div>
+      )}
       <div 
         ref={containerRef}
-        className="w-full h-full" 
-        style={{ 
-          aspectRatio: aspectRatio === '9:16' ? '9/16' : '16/9',
-          width: '100%',
-          height: '100%'
-        }}
+        className={`w-full h-full ${className}`}
       />
     </div>
   );

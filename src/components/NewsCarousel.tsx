@@ -90,7 +90,7 @@ export const NewsCarousel: React.FC<NewsCarouselProps> = ({ className = '' }) =>
             className="absolute inset-0 transition-all duration-700 ease-in-out"
             style={getCardStyle(index)}
           >
-            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col mx-2">
+            <div className="bg-white rounded-2xl shadow-xl p-6 h-full flex flex-col mx-2">
               {/* News Outlet Logo */}
               <div className="flex justify-center mb-4">
                 <img
